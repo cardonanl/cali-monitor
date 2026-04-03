@@ -1,92 +1,143 @@
 # Cali Monitor
 
-Dashboard de inteligencia de noticias para la administración pública de Santiago de Cali, Colombia. Agrega, clasifica y geolocaliza noticias de múltiples fuentes locales en tiempo real.
+**Monitor de situación para la administración pública de Santiago de Cali, Colombia.**
+
+Cali Monitor agrega, clasifica y geolocaliza noticias de fuentes locales en tiempo real, permitiendo a equipos de gobierno tener una visión consolidada de lo que ocurre en la ciudad: dónde están ocurriendo los eventos, qué secretarías están involucradas y cómo evoluciona la actividad informativa a lo largo del día.
+
+---
+
+## ¿Para qué sirve?
+
+La Alcaldía de Cali y sus dependencias reciben información dispersa de decenas de medios locales. Cali Monitor centraliza esa información en un único panel operativo que responde preguntas como:
+
+- ¿Qué está pasando hoy en materia de seguridad pública?
+- ¿En qué barrios se están reportando incidentes o novedades?
+- ¿Cuántas noticias sobre infraestructura vial salieron esta semana?
+- ¿Hay un pico de actividad informativa que requiera atención?
+
+El sistema está diseñado para operar como una **sala de situación digital**: siempre actualizado, sin intervención manual, con categorías alineadas a la estructura de la administración municipal.
+
+---
 
 ## Características
 
-- **Agregación RSS** — Google News, Q'Hubo Cali, Occidente, Alcaldía de Cali
-- **Clasificación automática** — GPT-4o-mini categoriza cada artículo en 13 categorías orientadas a gestión pública (Seguridad Pública, Infraestructura y Obras, Movilidad, Medio Ambiente, etc.)
-- **Mapa de barrios** — extrae el barrio mencionado en cada artículo y lo ubica sobre los 339 barrios oficiales de Cali (shapefile IDESC)
+### Agregación de noticias
+Monitorea en tiempo real las siguientes fuentes locales:
+- **Google News** — búsquedas específicas para Cali y Valle del Cauca
+- **Q'Hubo Cali** — medio popular con amplia cobertura local
+- **Occidente** — diario regional del Valle del Cauca
+- **90 Minutos** — noticiero local de Cali
+- **Alcaldía de Cali** — noticias oficiales del gobierno municipal
+
+### Clasificación automática por área de gobierno
+Cada artículo es clasificado automáticamente en una de 13 categorías orientadas a la gestión pública:
+
+| Categoría | Secretaría / Entidad relacionada |
+|---|---|
+| Seguridad Pública | Secretaría de Seguridad y Justicia |
+| Salud | Secretaría de Salud |
+| Educación | Secretaría de Educación |
+| Infraestructura y Obras | Secretaría de Infraestructura |
+| Movilidad y Transporte | Secretaría de Movilidad |
+| Medio Ambiente | DAGMA |
+| Desarrollo Social | Secretaría de Bienestar Social |
+| Desarrollo Económico | Secretaría de Desarrollo Económico |
+| Gobernanza | Alcaldía / Concejo Municipal |
+| Judicial | Fiscalía / Tribunales |
+| Cultura y Eventos | Secretaría de Cultura |
+| Emergencias | DAGRD |
+| General | — |
+
+### Mapa de barrios
+Cuando una noticia menciona un barrio de Cali, el sistema lo detecta y lo ubica en un mapa interactivo sobre los **339 barrios oficiales** de la ciudad (datos del IDESC). Los equipos pueden ver de un vistazo en qué zonas se concentra la actividad informativa.
+
+### Dashboard operativo
+- **4 KPIs** — total de artículos en base de datos, últimas 24h, fuentes activas, categorías con cobertura
+- **Distribución por categoría** — barras proporcionales para ver qué temas dominan la agenda
+- **Actividad por hora** — gráfica de área para identificar picos informativos
+- **Nube de palabras** — términos más frecuentes en las últimas 24 horas
 - **Filtros en tiempo real** — filtra por categoría y/o barrio sin recargar la página
-- **Dashboard** — KPIs, distribución por tópico, actividad horaria, nube de palabras
-- **Auto-refresh** — se actualiza cada 30 minutos con countdown visible
 
-## Stack
+### Actualización automática
+El panel se refresca automáticamente cada 30 minutos. También se puede forzar una actualización manual desde el header.
 
-- [Next.js](https://nextjs.org) 14 (App Router + TypeScript)
-- [Supabase](https://supabase.com) — base de datos y RLS
-- [OpenAI](https://openai.com) gpt-4o-mini — clasificación y extracción de barrio
-- [Leaflet](https://leafletjs.com) / react-leaflet — mapa interactivo
-- [Recharts](https://recharts.org) — gráficas
-- Tailwind CSS + CSS custom properties (dark mode)
+---
 
-## Correr localmente
+## Stack tecnológico
+
+| Capa | Tecnología |
+|---|---|
+| Frontend / Backend | Next.js 14 (App Router + TypeScript) |
+| Base de datos | Supabase (PostgreSQL + RLS) |
+| Clasificación IA | OpenAI gpt-4o-mini |
+| Mapa | Leaflet / react-leaflet |
+| Gráficas | Recharts |
+| Estilos | Tailwind CSS + CSS custom properties |
+| Datos geográficos | Shapefile IDESC Cali (EPSG:6249 → WGS84) |
+
+---
+
+## Instalación local
 
 ```bash
-# 1. Instalar dependencias
+# 1. Clonar el repositorio
+git clone https://github.com/cardonanl/cali-monitor.git
+cd cali-monitor
+
+# 2. Instalar dependencias
 npm install
 
-# 2. Configurar variables de entorno
+# 3. Configurar variables de entorno
 cp .env.example .env.local
-# Editar .env.local con tus keys
+# Editar .env.local con tus keys de Supabase, OpenAI y el secret de reclasificación
 
-# 3. Correr migraciones en Supabase (SQL Editor)
-# Ver supabase/schema.sql
+# 4. Ejecutar migraciones en Supabase
+# Ir a Supabase → SQL Editor y ejecutar supabase/schema.sql
 
-# 4. Iniciar servidor de desarrollo
+# 5. Iniciar servidor de desarrollo
 npm run dev
 ```
 
 Abre [http://localhost:3000](http://localhost:3000).
+
+---
 
 ## Variables de entorno
 
 | Variable | Descripción |
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Key pública (solo lectura) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Service role key (escritura server-side) |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Key pública (solo lectura SELECT) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key (escritura server-side, nunca exponer) |
 | `OPENAI_API_KEY` | Key de OpenAI para clasificación |
 | `RECLASSIFY_SECRET` | Token para proteger `POST /api/reclassify` |
 
 Ver `.env.example` para el formato completo.
 
-## Scripts
+---
+
+## Scripts de administración
 
 ```bash
-# Convertir shapefile de barrios a GeoJSON (solo se necesita una vez)
-node scripts/convert-barrios.mjs
-
-# Scraping histórico del último mes (fuentes RSS + Alcaldía)
+# Scraping histórico del último mes (alimentar la BD por primera vez)
 node scripts/scrape-historical.mjs
 
 # Reclasificar todos los artículos con las categorías actuales
-curl -X POST http://localhost:3000/api/reclassify \
+curl -X POST https://cali-monitor.vercel.app/api/reclassify \
   -H "Authorization: Bearer TU_RECLASSIFY_SECRET"
+
+# Regenerar el GeoJSON de barrios desde el shapefile fuente
+node scripts/convert-barrios.mjs
 ```
 
-## Fuentes de noticias
+---
 
-| Fuente | Tipo | Filtro |
-|---|---|---|
-| Google News - Cali | RSS | Keywords Cali/Valle |
-| Google News - Valle | RSS | Keywords Cali/Valle |
-| 90 Minutos | Google News `site:` | Keywords Cali/Valle |
-| Q'Hubo Cali | RSS directo | Sin filtro |
-| Occidente | RSS directo | Sin filtro |
-| Alcaldía de Cali | Scraping HTML | Sin filtro |
+## Datos geográficos
 
-## Categorías de clasificación
+El mapa utiliza el shapefile oficial **mc_barrios** del IDESC (Infraestructura de Datos Espaciales de Santiago de Cali), convertido a GeoJSON en WGS84 mediante reproyección desde MAGNA-Sirgas / Cali (EPSG:6249). El archivo resultante (`public/barrios.geojson`) contiene los 339 barrios con su geometría y centroide calculado.
 
-Seguridad Pública · Salud · Educación · Infraestructura y Obras · Movilidad y Transporte · Medio Ambiente · Desarrollo Social · Desarrollo Económico · Gobernanza · Judicial · Cultura y Eventos · Emergencias · General
+---
 
-## Deploy
+## Demo
 
-Desplegado en [Vercel](https://vercel.com). Agregar las 5 variables de entorno en **Settings → Environment Variables** antes del primer deploy.
-
-Después del primer deploy, revocar las políticas RLS de escritura pública en Supabase:
-
-```sql
-drop policy if exists "Server upsert access" on articles;
-drop policy if exists "Server update access" on articles;
-```
+[https://cali-monitor.vercel.app](https://cali-monitor.vercel.app)
