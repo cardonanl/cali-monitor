@@ -46,7 +46,14 @@ Criterios de categorización (prioriza la acción o decisión pública, no el ev
 IMPORTANTE: El resultado de un partido de fútbol va en "Cultura y Eventos", NO en otra categoría.
 Un polideportivo nuevo va en "Infraestructura y Obras".
 
-Para el barrio: devuelve el nombre EXACTO de la lista canónica si el titular lo menciona, o null si no.
+Para el barrio: devuelve el nombre EXACTO de la lista canónica si el titular menciona claramente ese barrio, o null si no.
+
+CASOS ESPECIALES — devuelve null para el barrio si:
+- El titular menciona "3 de Julio" o "20 de Julio" como fecha, no como referencia al barrio.
+- El titular menciona "Alfonso Bonilla Aragón" refiriéndose al aeropuerto (vuelos, aerolíneas, pista, terminal, aeropuerto), NO al barrio.
+- El titular menciona "Base Aérea" refiriéndose a instalaciones militares o aeronáuticas, no al barrio.
+- El nombre que aparece es de una persona, institución o evento, no del barrio en sí.
+Solo asigna barrio cuando el texto se refiere inequívocamente al sector residencial/urbano de ese nombre.
 
 Responde SOLO con JSON: {"results": [{"index": 0, "topic": "Categoría", "neighborhood": "Nombre exacto o null"}, ...]}`;
 

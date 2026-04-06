@@ -1,5 +1,5 @@
 import { fetchAllNews } from "@/lib/fetchNews";
-import { getDashboardStats, getHourlyActivity, getWordFrequencies, getNeighborhoodArticles } from "@/lib/stats";
+import { getDashboardStats, getWeeklyActivity, getWordFrequencies, getNeighborhoodArticles, getDailySummary } from "@/lib/stats";
 import { ArticleSection } from "@/components/ArticleSection";
 import { Header } from "@/components/Header";
 import { Dashboard } from "@/components/Dashboard";
@@ -11,17 +11,18 @@ export default async function Home() {
   // Stats queries run after so they always see the current batch.
   const { articles, fetchedAt, total } = await fetchAllNews();
 
-  const [stats, hourly, words, neighborhoodArticles] = await Promise.all([
+  const [stats, weekly, words, neighborhoodArticles, dailySummary] = await Promise.all([
     getDashboardStats(),
-    getHourlyActivity(),
+    getWeeklyActivity(),
     getWordFrequencies(),
     getNeighborhoodArticles(),
+    getDailySummary(),
   ]);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-base)" }}>
       <Header total={total} fetchedAt={fetchedAt} />
-      <Dashboard stats={stats} hourly={hourly} words={words} neighborhoodArticles={neighborhoodArticles} />
+      <Dashboard stats={stats} weekly={weekly} words={words} neighborhoodArticles={neighborhoodArticles} dailySummary={dailySummary} />
 
       <ArticleSection articles={articles} />
 

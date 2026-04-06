@@ -1,5 +1,8 @@
+import OpenAI from "openai";
 import { supabase } from "./supabase";
 import { DashboardStats, Topic } from "./types";
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export interface HourlyBucket {
   hour: string;   // "HH:00"
@@ -25,10 +28,11 @@ const STOPWORDS = new Set([
 export async function getDashboardStats(): Promise<DashboardStats> {
   const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-  const [totalRes, last24hRes, byTopicRes, bySourceRes] = await Promise.all([
+  const [totalRes, last24hRes, byTopicRes, byTopic24hRes, bySourceRes] = await Promise.all([
     supabase.from("articles").select("*", { count: "exact", head: true }),
     supabase.from("articles").select("*", { count: "exact", head: true }).gte("fetched_at", yesterday),
     supabase.from("articles").select("topic").not("topic", "is", null),
+    supabase.from("articles").select("topic").not("topic", "is", null).gte("fetched_at", yesterday),
     supabase.from("articles").select("source"),
   ]);
 
@@ -38,6 +42,15 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     topicCounts.set(t, (topicCounts.get(t) ?? 0) + 1);
   }
   const byTopic = [...topicCounts.entries()]
+    .map(([topic, count]) => ({ topic, count }) as { topic: never; count: number })
+    .sort((a, b) => b.count - a.count);
+
+  const topicCounts24h = new Map<string, number>();
+  for (const row of byTopic24hRes.data ?? []) {
+    const t = row.topic as string;
+    topicCounts24h.set(t, (topicCounts24h.get(t) ?? 0) + 1);
+  }
+  const byTopic24h = [...topicCounts24h.entries()]
     .map(([topic, count]) => ({ topic, count }) as { topic: never; count: number })
     .sort((a, b) => b.count - a.count);
 
@@ -54,6 +67,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     total: totalRes.count ?? 0,
     last24h: last24hRes.count ?? 0,
     byTopic,
+    byTopic24h,
     bySource,
   };
 }
@@ -96,6 +110,69 @@ export async function getNeighborhoodArticles(): Promise<NeighborhoodArticle[]> 
     .order("published_at", { ascending: false })
     .limit(500);
   return (data ?? []) as NeighborhoodArticle[];
+}
+
+export interface DayBucket {
+  date: string; // "DD/MM"
+  count: number;
+}
+
+export async function getWeeklyActivity(): Promise<DayBucket[]> {
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  sevenDaysAgo.setHours(0, 0, 0, 0);
+  const { data } = await supabase
+    .from("articles")
+    .select("published_at")
+    .gte("published_at", sevenDaysAgo.toISOString());
+
+  const counts = new Map<string, number>();
+  for (const row of data ?? []) {
+    const d = new Date(row.published_at as string);
+    const key = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  // Build ordered array: today-6 … today
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000);
+    const key = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+    return { date: key, count: counts.get(key) ?? 0 };
+  });
+}
+
+export async function getDailySummary(): Promise<string> {
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { data } = await supabase
+    .from("articles")
+    .select("title, topic, source")
+    .gte("fetched_at", yesterday)
+    .order("published_at", { ascending: false })
+    .limit(80);
+
+  if (!data || data.length === 0) return "No hay noticias recientes para resumir.";
+
+  const headlines = data
+    .map((r, i) => `${i + 1}. [${r.topic ?? "General"}] ${r.title}`)
+    .join("\n");
+
+  try {
+    const res = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      temperature: 0.3,
+      max_tokens: 350,
+      messages: [
+        {
+          role: "system",
+          content:
+            "Eres un analista de noticias municipales para la Alcaldía de Cali. Redacta un resumen ejecutivo breve (máximo 3 párrafos cortos) de los titulares del día que se te proporcionan. Prioriza los temas de mayor impacto ciudadano: seguridad, salud, obras públicas y emergencias. Escribe en español formal, sin listar los titulares, sino sintetizando los temas principales.",
+        },
+        { role: "user", content: `Titulares de las últimas 24 horas:\n\n${headlines}` },
+      ],
+    });
+    return res.choices[0].message.content ?? "No se pudo generar el resumen.";
+  } catch {
+    return "No se pudo generar el resumen en este momento.";
+  }
 }
 
 export async function getWordFrequencies(): Promise<WordFreq[]> {

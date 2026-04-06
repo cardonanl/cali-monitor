@@ -39,5 +39,6 @@ export interface DashboardStats {
   total: number;
   last24h: number;
   byTopic: TopicStat[];
+  byTopic24h: TopicStat[];
   bySource: { source: string; count: number }[];
 }

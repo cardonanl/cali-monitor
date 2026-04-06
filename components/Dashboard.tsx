@@ -1,8 +1,7 @@
 import { DashboardStats, Topic } from "@/lib/types";
-import { HourlyBucket, WordFreq, NeighborhoodArticle } from "@/lib/stats";
+import { DayBucket, WordFreq, NeighborhoodArticle } from "@/lib/stats";
 import { TOPIC_COLORS_HEX } from "./TopicBadge";
-import { TopicChart24h } from "./charts/TopicChart24h";
-import { HourlyChart } from "./charts/HourlyChart";
+import { WeeklyChart } from "./charts/WeeklyChart";
 import { WordCloud } from "./charts/WordCloud";
 import { MapPanel } from "./MapPanel";
 import { Newspaper, Clock, TrendingUp, Radio, MapPin } from "lucide-react";
@@ -42,17 +41,38 @@ function ChartPanel({ title, children }: { title: string; children: React.ReactN
 }
 
 export function Dashboard({
-  stats, hourly, words, neighborhoodArticles,
+  stats, weekly, words, neighborhoodArticles, dailySummary,
 }: {
   stats: DashboardStats;
-  hourly: HourlyBucket[];
+  weekly: DayBucket[];
   words: WordFreq[];
   neighborhoodArticles: NeighborhoodArticle[];
+  dailySummary: string;
 }) {
-  const maxCount = stats.byTopic[0]?.count ?? 1;
+  const maxCount24h = stats.byTopic24h[0]?.count ?? 1;
 
   return (
     <section className="max-w-7xl mx-auto w-full px-4 pt-5 pb-2 flex flex-col gap-4">
+
+      {/* Site header */}
+      <div className="flex flex-col gap-1 pt-2 pb-1">
+        <h1 className="text-2xl font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
+          Monitor de Situación para Cali
+        </h1>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Creado por Nicolas Cardona &mdash;{" "}
+          <a
+            href="https://github.com/cardonanl/cali-monitor"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "var(--accent)" }}
+            className="hover:underline"
+          >
+            github.com/cardonanl/cali-monitor
+          </a>
+        </p>
+      </div>
+
       {/* KPI row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard label="Total en BD" value={stats.total}
@@ -67,13 +87,14 @@ export function Dashboard({
 
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Topic distribution bar chart */}
-        <ChartPanel title="Distribución por tópico (BD)">
-          {stats.byTopic.length > 0 ? (
+
+        {/* Topic distribution — últimas 24h (horizontal bars) */}
+        <ChartPanel title="Distribución por tópico — últimas 24h">
+          {stats.byTopic24h.length > 0 ? (
             <div className="flex flex-col gap-2">
-              {stats.byTopic.map(({ topic, count }) => {
+              {stats.byTopic24h.map(({ topic, count }) => {
                 const color = TOPIC_COLORS_HEX[topic as Topic] ?? "#64748b";
-                const pct = Math.round((count / maxCount) * 100);
+                const pct = Math.round((count / maxCount24h) * 100);
                 return (
                   <div key={topic} className="flex items-center gap-3">
                     <span className="text-xs w-28 shrink-0 truncate" style={{ color }}>{topic}</span>
@@ -89,20 +110,26 @@ export function Dashboard({
             </div>
           ) : (
             <p className="text-xs text-center py-6" style={{ color: "var(--text-muted)" }}>
-              Sin datos — agrega la columna topic en Supabase
+              Sin datos en las últimas 24h
             </p>
           )}
         </ChartPanel>
 
-        {/* 24h topic bar chart */}
-        <ChartPanel title="Tópicos — últimas 24h">
-          <TopicChart24h data={stats.byTopic} />
+        {/* AI daily summary */}
+        <ChartPanel title="Resumen del día — generado por IA">
+          <div
+            className="text-sm leading-relaxed whitespace-pre-line overflow-auto"
+            style={{ color: "var(--text-primary)", maxHeight: 220 }}
+          >
+            {dailySummary}
+          </div>
         </ChartPanel>
 
-        {/* Hourly activity */}
-        <ChartPanel title="Actividad por hora — últimas 24h">
-          <HourlyChart data={hourly} />
+        {/* Weekly activity line chart */}
+        <ChartPanel title="Noticias por día — última semana">
+          <WeeklyChart data={weekly} />
         </ChartPanel>
+
       </div>
 
       {/* Word cloud */}
