@@ -7,18 +7,33 @@ const NEWS_URL = `${BASE_URL}/boletines/`;
 const SOURCE = "Alcaldía de Cali";
 
 const MONTH_MAP: Record<string, number> = {
+  // Spanish
   ene: 0, feb: 1, mar: 2, abr: 3, may: 4, jun: 5,
   jul: 6, ago: 7, sep: 8, oct: 9, nov: 10, dic: 11,
+  // English (page uses "Apr 08 de 2026" format)
+  jan: 0, apr: 3, aug: 7, dec: 11,
 };
 
 function parseDate(raw: string): Date {
-  // Format: "02 Abr.-26"  → April 2, 2026
-  const m = raw.trim().match(/(\d{1,2})\s+([A-Za-záéíóú]{3})\.?-?(\d{2,4})/i);
-  if (!m) return new Date();
-  const day = parseInt(m[1]);
-  const month = MONTH_MAP[m[2].toLowerCase().slice(0, 3)] ?? 0;
-  const year = parseInt(m[3]) < 100 ? 2000 + parseInt(m[3]) : parseInt(m[3]);
-  return new Date(year, month, day);
+  const s = raw.trim();
+
+  // Format: "Apr 08 de 2026" or "Feb 11 de 2026"
+  const m1 = s.match(/([A-Za-z]{3})\s+(\d{1,2})\s+de\s+(\d{4})/i);
+  if (m1) {
+    const month = MONTH_MAP[m1[1].toLowerCase()] ?? 0;
+    return new Date(parseInt(m1[3]), month, parseInt(m1[2]));
+  }
+
+  // Legacy format: "02 Abr.-26"
+  const m2 = s.match(/(\d{1,2})\s+([A-Za-záéíóú]{3})\.?-?(\d{2,4})/i);
+  if (m2) {
+    const day = parseInt(m2[1]);
+    const month = MONTH_MAP[m2[2].toLowerCase().slice(0, 3)] ?? 0;
+    const year = parseInt(m2[3]) < 100 ? 2000 + parseInt(m2[3]) : parseInt(m2[3]);
+    return new Date(year, month, day);
+  }
+
+  return new Date();
 }
 
 export async function scrapeAlcaldia(pages = 3): Promise<Article[]> {
@@ -42,25 +57,34 @@ export async function scrapeAlcaldia(pages = 3): Promise<Article[]> {
       const html = await res.text();
       const $ = load(html);
 
-      // Boletines listing: links follow /boletines/publicaciones/XXXXX/ pattern
-      $("a[href*='/boletines/']").each((_, el) => {
+      // Each article card: <a class="... content-box ..."> with a boletines URL.
+      // We skip "new-tools-box" links (they contain only date/category text).
+      $("a[href*='/boletines/publicaciones/']").each((_, el) => {
         const href = $(el).attr("href") ?? "";
+
+        // Must match /boletines/publicaciones/<numeric-id>/
         if (!href.match(/\/boletines\/publicaciones\/\d+\//)) return;
 
-        const title = $(el).text().trim();
-        if (!title || title.length < 10) return;
+        // Skip the date-only companion link
+        const classes = $(el).attr("class") ?? "";
+        if (classes.includes("new-tools-box")) return;
 
         const articleUrl = href.startsWith("http") ? href : `${BASE_URL}${href}`;
-        // Only accept URLs from the boletines section
         if (!articleUrl.includes("/boletines/")) return;
 
-        // Summary: sibling or parent <p>
-        const parent = $(el).closest("div, li, article");
-        const summary = parent.find("p").first().text().trim().slice(0, 220);
+        // Title: prefer the .rollover-box .title element, fall back to <strong>
+        const titleFromRollover = $(el).find(".rollover-box .title").first().text().trim();
+        const titleFromStrong = $(el).find("strong").first().text().trim();
+        const title = titleFromRollover || titleFromStrong;
+        if (!title || title.length < 10) return;
 
-        // Date: last <span> in the parent
-        const spans = parent.find("span");
-        const dateRaw = spans.last().text().trim();
+        // Summary: data-description attribute on .rollover-box
+        const summary = $(el).find(".rollover-box").attr("data-description")?.trim().slice(0, 220) ?? "";
+
+        // Date: look for sibling new-tools-box .date within the same container
+        const container = $(el).parent();
+        const dateRaw = container.find(".new-tools-box .date").first().text().trim()
+          || container.find(".date").first().text().trim();
         const publishedAt = parseDate(dateRaw);
 
         // Skip articles older than 45 days
@@ -74,7 +98,6 @@ export async function scrapeAlcaldia(pages = 3): Promise<Article[]> {
         articles.push({ id, title, source: SOURCE, publishedAt, summary, url: articleUrl });
       });
 
-      // Stop if no articles found on this page
       if (articles.length === 0 && page === 1) break;
 
     } catch (err) {
