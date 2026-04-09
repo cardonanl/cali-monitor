@@ -3,7 +3,7 @@ import { createHash } from "crypto";
 import { Article } from "../types";
 
 const BASE_URL = "https://www.cali.gov.co";
-const NEWS_URL = `${BASE_URL}/publicaciones/noticias/`;
+const NEWS_URL = `${BASE_URL}/boletines/`;
 const SOURCE = "Alcaldía de Cali";
 
 const MONTH_MAP: Record<string, number> = {
@@ -42,15 +42,17 @@ export async function scrapeAlcaldia(pages = 3): Promise<Article[]> {
       const html = await res.text();
       const $ = load(html);
 
-      // Each news item has an <a> with href /publicaciones/... inside a listing container
-      $("a[href*='/publicaciones/']").each((_, el) => {
+      // Boletines listing: links follow /boletines/publicaciones/XXXXX/ pattern
+      $("a[href*='/boletines/']").each((_, el) => {
         const href = $(el).attr("href") ?? "";
-        if (!href.match(/\/publicaciones\/\d+\//)) return;
+        if (!href.match(/\/boletines\/publicaciones\/\d+\//)) return;
 
         const title = $(el).text().trim();
         if (!title || title.length < 10) return;
 
         const articleUrl = href.startsWith("http") ? href : `${BASE_URL}${href}`;
+        // Only accept URLs from the boletines section
+        if (!articleUrl.includes("/boletines/")) return;
 
         // Summary: sibling or parent <p>
         const parent = $(el).closest("div, li, article");
