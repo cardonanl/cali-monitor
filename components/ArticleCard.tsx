@@ -55,7 +55,7 @@ export function ArticleCard({ article }: { article: Article }) {
 
       {/* Summary */}
       {article.summary && (
-        <p className="text-xs leading-relaxed line-clamp-3" style={{ color: "var(--amber-dim)", opacity: 0.85 }}>
+        <p className="text-xs leading-relaxed line-clamp-3" style={{ color: "var(--text-muted)" }}>
           {article.summary}
         </p>
       )}

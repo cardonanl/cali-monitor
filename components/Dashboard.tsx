@@ -23,7 +23,7 @@ function TerminalPanel({ label, children, className }: { label: string; children
 function KpiBlock({ label, value, accent }: { label: string; value: number | string; accent?: string }) {
   return (
     <div className="terminal-panel p-4 flex flex-col gap-1">
-      <span className="text-xs tracking-widest" style={{ color: "var(--text-muted)" }}>
+      <span className="text-xs tracking-widest" style={{ color: "var(--amber-dim)" }}>
         // {label}
       </span>
       <span
@@ -48,7 +48,7 @@ export function Dashboard({
   const maxCount24h = stats.byTopic24h[0]?.count ?? 1;
 
   return (
-    <section className="max-w-7xl mx-auto w-full px-4 pt-5 pb-2 flex flex-col gap-4">
+    <section className="w-full px-6 pt-5 pb-2 flex flex-col gap-4">
 
       {/* Site header block */}
       <div className="flex flex-col gap-0.5 border-b pb-3" style={{ borderColor: "var(--border)" }}>

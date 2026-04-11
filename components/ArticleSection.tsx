@@ -38,7 +38,7 @@ export function ArticleSection({ articles }: { articles: Article[] }) {
   const hasFilters = activeTopic !== ALL || activeNeighborhood !== ALL;
 
   return (
-    <section className="flex-1 max-w-7xl mx-auto w-full px-4 py-4">
+    <section className="flex-1 w-full px-6 py-4">
       {/* Filter bar */}
       <div
         className="mb-4 p-3"

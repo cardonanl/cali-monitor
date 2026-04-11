@@ -5,10 +5,10 @@
   --bg-card:       #110e00;
   --bg-card-hover: #181200;
   --border:        #3d2800;
-  --text-primary:  #ffb000;
-  --text-muted:    #7a5200;
-  --accent:        #ffd000;
-  --amber-bright:  #ffcc44;
+  --text-primary:  #ede0c4;   /* warm cream — main reading text */
+  --text-muted:    #8a7050;   /* muted warm gray for timestamps, secondary */
+  --accent:        #ffb000;   /* pure amber — structural chrome */
+  --amber-bright:  #ffd000;
   --amber-dim:     #a06800;
 }
 

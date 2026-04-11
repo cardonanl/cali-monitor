@@ -15,7 +15,7 @@ export function Header({
         borderBottom: "1px solid var(--border)",
       }}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <span className="text-xs tracking-widest" style={{ color: "var(--amber-dim)" }}>
             ▶
