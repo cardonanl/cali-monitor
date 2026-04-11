@@ -43,7 +43,7 @@ export function ArticleCard({ article }: { article: Article }) {
         className="group"
       >
         <h2
-          className="text-xs leading-snug line-clamp-3 transition-colors"
+          className="text-sm leading-snug line-clamp-3 transition-colors"
           style={{ color: "var(--text-primary)" }}
         >
           <span style={{ color: "var(--text-muted)" }}>›</span>{" "}
@@ -55,7 +55,7 @@ export function ArticleCard({ article }: { article: Article }) {
 
       {/* Summary */}
       {article.summary && (
-        <p className="text-xs leading-relaxed line-clamp-2" style={{ color: "var(--text-muted)" }}>
+        <p className="text-xs leading-relaxed line-clamp-3" style={{ color: "var(--amber-dim)", opacity: 0.85 }}>
           {article.summary}
         </p>
       )}

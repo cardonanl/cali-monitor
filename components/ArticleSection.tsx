@@ -45,13 +45,13 @@ export function ArticleSection({ articles }: { articles: Article[] }) {
         style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-card)" }}
       >
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs tracking-widest" style={{ color: "var(--text-muted)" }}>
+          <p className="text-sm tracking-widest" style={{ color: "var(--text-muted)" }}>
             ▶ FILTROS — {filtered.length} RESULTADO{filtered.length !== 1 ? "S" : ""}
           </p>
           {hasFilters && (
             <button
               onClick={() => { setActiveTopic(ALL); setActiveNeighborhood(ALL); }}
-              className="text-xs px-2 py-0.5 transition-colors"
+              className="text-sm px-2 py-0.5 transition-colors"
               style={{
                 color: "var(--text-muted)",
                 border: "1px solid var(--border)",
