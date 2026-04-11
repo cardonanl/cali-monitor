@@ -1,25 +1,24 @@
 @import "tailwindcss";
 
-/* ── Cali flag colors: Azul #0000dd · Rojo #dd0000 · Blanco #fff · Verde #00aa00 ── */
 :root {
-  --bg-base:       #010c20;   /* navy black */
-  --bg-card:       #051828;   /* dark navy */
-  --bg-card-hover: #0a2238;
-  --border:        #1a3a6a;
+  --bg-base:       #080808;
+  --bg-card:       #111111;
+  --bg-card-hover: #1a1a1a;
+  --border:        #2e2e2e;
 
-  --text-primary:  #f0f4ff;   /* near white */
-  --text-muted:    #5a7a9a;   /* muted blue-gray */
+  --white:   #ffffff;
+  --yellow:  #ffd700;
+  --green:   #00dd44;
+  --red:     #ff3333;
+  --orange:  #ff9900;
 
-  --flag-blue:     #1a4fd6;   /* flag blue, lightened for dark bg */
-  --flag-red:      #cc1111;   /* flag red */
-  --flag-green:    #00a000;   /* flag green */
-  --flag-white:    #ffffff;
-
-  /* aliases */
-  --accent:        var(--flag-blue);
-  --accent-bright: #5588ff;
-  --accent-dim:    #0a2d70;
+  --text-primary: #ffffff;
+  --text-muted:   #ffd700;   /* yellow — visible secondary text */
+  --accent:       #00dd44;   /* green */
 }
+
+/* Bump all rem sizes: 18px root = +2px on base, scales proportionally */
+html { font-size: 18px; }
 
 /* ── Scanline overlay ── */
 body::after {
@@ -32,8 +31,8 @@ body::after {
     to bottom,
     transparent 0px,
     transparent 3px,
-    rgba(0, 0, 0, 0.09) 3px,
-    rgba(0, 0, 0, 0.09) 4px
+    rgba(0,0,0,0.08) 3px,
+    rgba(0,0,0,0.08) 4px
   );
 }
 
@@ -41,31 +40,30 @@ body {
   background-color: var(--bg-base);
   color: var(--text-primary);
   font-family: "Share Tech Mono", monospace;
-  font-size: 15px;
 }
 
-/* ── Article card ── */
+/* ── Cards ── */
 .article-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border);
 }
 .article-card:hover {
   background-color: var(--bg-card-hover);
-  border-color: var(--flag-blue);
+  border-color: #555;
 }
 
-/* ── Terminal panel ── */
+/* ── Panels ── */
 .terminal-panel {
   background-color: var(--bg-card);
   border: 1px solid var(--border);
 }
 
-/* ── Panel section title ── */
+/* ── Panel title bar ── */
 .panel-title {
-  font-size: 0.82rem;
-  letter-spacing: 0.11em;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent-bright);
+  color: var(--yellow);
   padding-bottom: 10px;
   margin-bottom: 14px;
   border-bottom: 1px solid var(--border);
@@ -77,11 +75,8 @@ body {
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 0; }
+::-webkit-scrollbar-thumb { background: var(--border); }
 
-/* ── Blinking cursor ── */
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
-}
+/* ── Blink ── */
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 .cursor-blink { animation: blink 1.2s step-end infinite; }

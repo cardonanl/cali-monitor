@@ -2,18 +2,17 @@ import { Topic } from "@/lib/types";
 
 export function TopicBadge({ topic }: { topic?: Topic }) {
   if (!topic) return null;
-  const color = TOPIC_COLORS_HEX[topic] ?? "#4d6e8a";
+  const color = TOPIC_COLORS_HEX[topic] ?? "#aaaaaa";
   return (
     <span
-      className="inline-block px-1.5 py-0 text-xs"
+      className="inline-block px-2 py-0 text-sm font-bold"
       style={{
-        color,
-        border: `1px solid ${color}88`,
-        backgroundColor: color + "18",
-        letterSpacing: "0.04em",
+        color: "#000000",
+        backgroundColor: color,
+        letterSpacing: "0.03em",
       }}
     >
-      [{topic}]
+      {topic}
     </span>
   );
 }
