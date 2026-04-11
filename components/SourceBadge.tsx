@@ -15,11 +15,11 @@ export function SourceBadge({ source }: { source: string }) {
   const color = SOURCE_COLORS_HEX[source] ?? DEFAULT_HEX;
   return (
     <span
-      className="inline-block px-1.5 py-0 text-xs"
+      className="inline-block px-1.5 py-0 text-sm"
       style={{
         color,
-        border: `1px solid ${color}55`,
-        backgroundColor: color + "14",
+        border: `1px solid ${color}88`,
+        backgroundColor: "transparent",
         letterSpacing: "0.03em",
       }}
     >

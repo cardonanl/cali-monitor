@@ -92,8 +92,8 @@ export function BarriosMap({ articles }: Props) {
           const arts = byNeighborhood.get(key) ?? [];
 
           let popupHtml = `<div style="max-width:260px;font-family:system-ui;font-size:13px">
-            <strong style="color:#f0f4ff">${name}</strong>
-            <span style="color:#5a7a9a;font-size:11px;margin-left:6px">Comuna ${feature.properties?.comuna ?? ""}</span>`;
+            <strong style="color:#ffffff">${name}</strong>
+            <span style="color:#ffd700;font-size:11px;margin-left:6px">Comuna ${feature.properties?.comuna ?? ""}</span>`;
 
           if (arts.length > 0) {
             popupHtml += `<hr style="border-color:#1e2f4d;margin:6px 0">`;
@@ -108,7 +108,7 @@ export function BarriosMap({ articles }: Props) {
               </div>`;
             }
             if (arts.length > 5) {
-              popupHtml += `<p style="color:#5a7a9a;font-size:11px">+${arts.length - 5} más</p>`;
+              popupHtml += `<p style="color:#ffd700;font-size:11px">+${arts.length - 5} más</p>`;
             }
           }
 
@@ -149,8 +149,8 @@ export function BarriosMap({ articles }: Props) {
         });
 
         let popupHtml = `<div style="max-width:260px;font-family:system-ui;font-size:13px">
-          <strong style="color:#f0f4ff">${barrio}</strong>
-          <span style="color:#5a7a9a;font-size:11px;margin-left:6px">Comuna ${comuna}</span>
+          <strong style="color:#ffffff">${barrio}</strong>
+          <span style="color:#ffd700;font-size:11px;margin-left:6px">Comuna ${comuna}</span>
           <hr style="border-color:#1e2f4d;margin:6px 0">`;
 
         for (const a of arts.slice(0, 5)) {
@@ -164,7 +164,7 @@ export function BarriosMap({ articles }: Props) {
           </div>`;
         }
         if (arts.length > 5) {
-          popupHtml += `<p style="color:#5a7a9a;font-size:11px">+${arts.length - 5} noticias más</p>`;
+          popupHtml += `<p style="color:#ffd700;font-size:11px">+${arts.length - 5} noticias más</p>`;
         }
         popupHtml += `</div>`;
 
@@ -182,28 +182,22 @@ export function BarriosMap({ articles }: Props) {
 
   return (
     <>
-      {/* Leaflet CSS */}
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        crossOrigin=""
-      />
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossOrigin="" />
       <style>{`
         .cali-popup .leaflet-popup-content-wrapper {
-          background: #051828;
-          border: 1px solid #1a3a6a;
+          background: #111111;
+          border: 1px solid #2e2e2e;
           border-radius: 4px;
-          color: #f0f4ff;
+          color: #ffffff;
           font-family: "Share Tech Mono", monospace;
         }
-        .cali-popup .leaflet-popup-tip {
-          background: #051828;
-        }
-        .cali-popup .leaflet-popup-close-button {
-          color: #5a7a9a;
-        }
+        .cali-popup .leaflet-popup-tip { background: #111111; }
+        .cali-popup .leaflet-popup-close-button { color: #ffd700; }
       `}</style>
-      <div ref={mapRef} style={{ width: "100%", height: "100%", minHeight: "450px" }} />
+      {/* position:relative wrapper so the map div can use absolute fill */}
+      <div style={{ position: "relative", width: "100%", height: "100%" }}>
+        <div ref={mapRef} style={{ position: "absolute", inset: 0 }} />
+      </div>
     </>
   );
 }
