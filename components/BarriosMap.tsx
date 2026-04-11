@@ -80,10 +80,10 @@ export function BarriosMap({ articles }: Props) {
           const name = feature?.properties?.barrio?.toLowerCase()?.trim() ?? "";
           const hasNews = byNeighborhood.has(name);
           return {
-            color: hasNews ? "#38bdf8" : "#1e2f4d",
-            weight: hasNews ? 1.5 : 0.8,
-            fillColor: hasNews ? "#38bdf8" : "#0d1526",
-            fillOpacity: hasNews ? 0.25 : 0.05,
+            color: hasNews ? "#5588ff" : "#1a3a6a",
+            weight: hasNews ? 1.5 : 0.6,
+            fillColor: hasNews ? "#1a4fd6" : "#051828",
+            fillOpacity: hasNews ? 0.30 : 0.05,
           };
         },
         onEachFeature: (feature, layer) => {
@@ -92,8 +92,8 @@ export function BarriosMap({ articles }: Props) {
           const arts = byNeighborhood.get(key) ?? [];
 
           let popupHtml = `<div style="max-width:260px;font-family:system-ui;font-size:13px">
-            <strong style="color:#e2e8f0">${name}</strong>
-            <span style="color:#64748b;font-size:11px;margin-left:6px">Comuna ${feature.properties?.comuna ?? ""}</span>`;
+            <strong style="color:#f0f4ff">${name}</strong>
+            <span style="color:#5a7a9a;font-size:11px;margin-left:6px">Comuna ${feature.properties?.comuna ?? ""}</span>`;
 
           if (arts.length > 0) {
             popupHtml += `<hr style="border-color:#1e2f4d;margin:6px 0">`;
@@ -102,13 +102,13 @@ export function BarriosMap({ articles }: Props) {
               popupHtml += `<div style="margin-bottom:6px">
                 <span style="color:${color};font-size:10px;text-transform:uppercase">${a.topic ?? "General"}</span><br>
                 <a href="${a.url}" target="_blank" rel="noopener"
-                   style="color:#38bdf8;text-decoration:none;line-height:1.3">
+                   style="color:#5588ff;text-decoration:none;line-height:1.3">
                   ${a.title}
                 </a>
               </div>`;
             }
             if (arts.length > 5) {
-              popupHtml += `<p style="color:#64748b;font-size:11px">+${arts.length - 5} más</p>`;
+              popupHtml += `<p style="color:#5a7a9a;font-size:11px">+${arts.length - 5} más</p>`;
             }
           }
 
@@ -149,8 +149,8 @@ export function BarriosMap({ articles }: Props) {
         });
 
         let popupHtml = `<div style="max-width:260px;font-family:system-ui;font-size:13px">
-          <strong style="color:#e2e8f0">${barrio}</strong>
-          <span style="color:#64748b;font-size:11px;margin-left:6px">Comuna ${comuna}</span>
+          <strong style="color:#f0f4ff">${barrio}</strong>
+          <span style="color:#5a7a9a;font-size:11px;margin-left:6px">Comuna ${comuna}</span>
           <hr style="border-color:#1e2f4d;margin:6px 0">`;
 
         for (const a of arts.slice(0, 5)) {
@@ -158,13 +158,13 @@ export function BarriosMap({ articles }: Props) {
           popupHtml += `<div style="margin-bottom:6px">
             <span style="color:${c};font-size:10px;text-transform:uppercase">${a.topic ?? "General"}</span><br>
             <a href="${a.url}" target="_blank" rel="noopener"
-               style="color:#38bdf8;text-decoration:none;line-height:1.3">
+               style="color:#5588ff;text-decoration:none;line-height:1.3">
               ${a.title}
             </a>
           </div>`;
         }
         if (arts.length > 5) {
-          popupHtml += `<p style="color:#64748b;font-size:11px">+${arts.length - 5} noticias más</p>`;
+          popupHtml += `<p style="color:#5a7a9a;font-size:11px">+${arts.length - 5} noticias más</p>`;
         }
         popupHtml += `</div>`;
 
@@ -190,19 +190,20 @@ export function BarriosMap({ articles }: Props) {
       />
       <style>{`
         .cali-popup .leaflet-popup-content-wrapper {
-          background: #0d1526;
-          border: 1px solid #1e2f4d;
-          border-radius: 8px;
-          color: #e2e8f0;
+          background: #051828;
+          border: 1px solid #1a3a6a;
+          border-radius: 4px;
+          color: #f0f4ff;
+          font-family: "Share Tech Mono", monospace;
         }
         .cali-popup .leaflet-popup-tip {
-          background: #0d1526;
+          background: #051828;
         }
         .cali-popup .leaflet-popup-close-button {
-          color: #64748b;
+          color: #5a7a9a;
         }
       `}</style>
-      <div ref={mapRef} style={{ width: "100%", height: "500px", borderRadius: "8px" }} />
+      <div ref={mapRef} style={{ width: "100%", height: "100%", minHeight: "450px" }} />
     </>
   );
 }

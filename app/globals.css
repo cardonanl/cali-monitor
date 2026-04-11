@@ -1,15 +1,24 @@
 @import "tailwindcss";
 
+/* ── Cali flag colors: Azul #0000dd · Rojo #dd0000 · Blanco #fff · Verde #00aa00 ── */
 :root {
-  --bg-base:       #020912;
-  --bg-card:       #06111f;
-  --bg-card-hover: #0b1a2e;
-  --border:        #1a3050;
-  --text-primary:  #dde8f5;   /* light blue-white — reading text */
-  --text-muted:    #4d6e8a;   /* muted blue-gray */
-  --accent:        #1f70c1;   /* IBM Blue 60 */
-  --accent-bright: #4589ff;   /* IBM Blue 40 */
-  --accent-dim:    #0a3d6b;   /* IBM Blue dark */
+  --bg-base:       #010c20;   /* navy black */
+  --bg-card:       #051828;   /* dark navy */
+  --bg-card-hover: #0a2238;
+  --border:        #1a3a6a;
+
+  --text-primary:  #f0f4ff;   /* near white */
+  --text-muted:    #5a7a9a;   /* muted blue-gray */
+
+  --flag-blue:     #1a4fd6;   /* flag blue, lightened for dark bg */
+  --flag-red:      #cc1111;   /* flag red */
+  --flag-green:    #00a000;   /* flag green */
+  --flag-white:    #ffffff;
+
+  /* aliases */
+  --accent:        var(--flag-blue);
+  --accent-bright: #5588ff;
+  --accent-dim:    #0a2d70;
 }
 
 /* ── Scanline overlay ── */
@@ -23,8 +32,8 @@ body::after {
     to bottom,
     transparent 0px,
     transparent 3px,
-    rgba(0, 0, 0, 0.10) 3px,
-    rgba(0, 0, 0, 0.10) 4px
+    rgba(0, 0, 0, 0.09) 3px,
+    rgba(0, 0, 0, 0.09) 4px
   );
 }
 
@@ -42,6 +51,7 @@ body {
 }
 .article-card:hover {
   background-color: var(--bg-card-hover);
+  border-color: var(--flag-blue);
 }
 
 /* ── Terminal panel ── */
@@ -50,10 +60,10 @@ body {
   border: 1px solid var(--border);
 }
 
-/* ── Section title inside panels ── */
+/* ── Panel section title ── */
 .panel-title {
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
+  font-size: 0.82rem;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
   color: var(--accent-bright);
   padding-bottom: 10px;

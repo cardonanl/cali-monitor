@@ -33,23 +33,23 @@ export function WeeklyChart({ data }: { data: DayBucket[] }) {
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: "#06111f",
-            border: "1px solid #1a3050",
+            backgroundColor: "#051828",
+            border: "1px solid #1a3a6a",
             borderRadius: 0,
             fontFamily: "Share Tech Mono, monospace",
           }}
           labelStyle={{ color: "#dde8f5", fontSize: 11 }}
-          itemStyle={{ color: "#4589ff", fontSize: 11 }}
-          cursor={{ stroke: "#1a3050" }}
+          itemStyle={{ color: "#5588ff", fontSize: 11 }}
+          cursor={{ stroke: "#1a3a6a" }}
           formatter={(v) => [v, "NOTICIAS"]}
         />
         <Line
           type="monotone"
           dataKey="count"
-          stroke="#4589ff"
+          stroke="#5588ff"
           strokeWidth={2}
-          dot={<Dot r={3} fill="#4589ff" stroke="#06111f" strokeWidth={1} />}
-          activeDot={{ r: 5, fill: "#4589ff" }}
+          dot={<Dot r={3} fill="#5588ff" stroke="#051828" strokeWidth={1} />}
+          activeDot={{ r: 5, fill: "#5588ff" }}
         />
       </LineChart>
     </ResponsiveContainer>

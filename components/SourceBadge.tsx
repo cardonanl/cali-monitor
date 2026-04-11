@@ -1,15 +1,15 @@
 const SOURCE_COLORS_HEX: Record<string, string> = {
-  "Google News - Cali":  "#4589ff",
-  "Google News - Valle": "#1192e8",
-  "90 Minutos":          "#be95ff",
-  "Q'Hubo Cali":         "#009d9a",
-  "Occidente":           "#33b1ff",
-  "Alcaldía de Cali":    "#0f62fe",
-  "El Tiempo - Cali":    "#ff832b",
-  "RCN Radio":           "#da1e28",
+  "Google News - Cali":  "#5588ff",
+  "Google News - Valle": "#1a4fd6",
+  "90 Minutos":          "#aa66ff",
+  "Q'Hubo Cali":         "#00a000",
+  "Occidente":           "#4499dd",
+  "Alcaldía de Cali":    "#cc1111",
+  "El Tiempo - Cali":    "#ff8833",
+  "RCN Radio":           "#dd2222",
 };
 
-const DEFAULT_HEX = "#4d6e8a";
+const DEFAULT_HEX = "#5a7a9a";
 
 export function SourceBadge({ source }: { source: string }) {
   const color = SOURCE_COLORS_HEX[source] ?? DEFAULT_HEX;

@@ -8,8 +8,8 @@ const BarriosMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex items-center justify-center h-[500px] text-sm"
-        style={{ color: "var(--text-muted)" }}>
+      <div className="flex items-center justify-center text-sm"
+        style={{ color: "var(--text-muted)", height: "100%", minHeight: "450px" }}>
         Cargando mapa…
       </div>
     ),
