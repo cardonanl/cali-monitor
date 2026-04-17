@@ -5,12 +5,6 @@ import { WeeklyChart } from "./charts/WeeklyChart";
 import { WordCloud } from "./charts/WordCloud";
 import { MapPanel } from "./MapPanel";
 
-const BAR_TOTAL = 24;
-function asciBar(pct: number): string {
-  const filled = Math.round((pct / 100) * BAR_TOTAL);
-  return "█".repeat(filled) + "░".repeat(BAR_TOTAL - filled);
-}
-
 function KpiBlock({ label, value, color }: { label: string; value: number | string; color: string }) {
   return (
     <div className="terminal-panel p-4 flex flex-col gap-1">
@@ -48,6 +42,9 @@ export function Dashboard({
             style={{ color: "var(--green)" }} className="hover:underline">
             github.com/cardonanl/cali-monitor
           </a>
+        </p>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Creado por: Nicolás Cardona
         </p>
       </div>
 
@@ -93,14 +90,17 @@ export function Dashboard({
                 const color = TOPIC_COLORS_HEX[topic as Topic] ?? "#fff";
                 const pct = Math.round((count / maxCount24h) * 100);
                 return (
-                  <div key={topic} style={{ color }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-                      <span style={{ fontSize: "0.88rem" }}>{topic}</span>
-                      <span style={{ fontSize: "0.88rem", color: "var(--yellow)" }}>{count}</span>
+                  <div key={topic}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
+                      <span style={{
+                        fontSize: "0.82rem", color,
+                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1,
+                      }}>{topic}</span>
+                      <span style={{ fontSize: "0.82rem", color: "var(--yellow)", flexShrink: 0 }}>{count}</span>
                     </div>
-                    <span style={{ fontSize: "0.72rem", letterSpacing: "-0.02em", color: color + "cc" }}>
-                      {asciBar(pct)}
-                    </span>
+                    <div style={{ height: 4, backgroundColor: "#1e1e1e" }}>
+                      <div style={{ height: "100%", width: `${pct}%`, backgroundColor: color }} />
+                    </div>
                   </div>
                 );
               })}

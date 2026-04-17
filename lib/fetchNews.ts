@@ -5,7 +5,6 @@ import { normalizeArticle, deduplicateArticles } from "./normalize";
 import { filterCaliRelevant } from "./filter";
 import { supabase } from "./supabase";
 import { supabaseAdmin } from "./supabaseAdmin";
-import { classifyArticles } from "./classify";
 import { scrapeAlcaldia } from "./scrapers/caliGov";
 
 const parser = new Parser({
@@ -59,28 +58,46 @@ export async function fetchAllNews(): Promise<NewsResponse> {
 
   const fetchedAt = new Date().toISOString();
 
-  // Upsert immediately WITHOUT topic so stats queries (which run after this)
-  // always see current articles in Supabase.
+  // Upsert immediately so stats queries always see current articles.
+  // Alcaldía articles get topic pre-assigned ("Gobernanza") — they are excluded
+  // from the daily classify cron. Other articles upsert without topic to preserve
+  // any existing classifications.
   if (deduped.length > 0) {
-    const { error } = await supabaseAdmin.from("articles").upsert(
-      deduped.map((a) => ({
-        id: a.id,
-        title: a.title,
-        source: a.source,
-        published_at: new Date(a.publishedAt).toISOString(),
-        summary: a.summary,
-        url: a.url,
-        fetched_at: fetchedAt,
-      })),
-      { onConflict: "id" }
-    );
-    if (error) console.error("[supabase] upsert failed:", error.message);
-    else console.log(`[supabase] upserted ${deduped.length} articles`);
+    const alcaldia = deduped.filter((a) => a.source === "Alcaldía de Cali");
+    const others   = deduped.filter((a) => a.source !== "Alcaldía de Cali");
+
+    if (alcaldia.length > 0) {
+      const { error } = await supabaseAdmin.from("articles").upsert(
+        alcaldia.map((a) => ({
+          id: a.id, title: a.title, source: a.source,
+          published_at: new Date(a.publishedAt).toISOString(),
+          summary: a.summary, url: a.url,
+          topic: "Gobernanza",
+          fetched_at: fetchedAt,
+        })),
+        { onConflict: "id" }
+      );
+      if (error) console.error("[supabase] alcaldía upsert failed:", error.message);
+    }
+
+    if (others.length > 0) {
+      const { error } = await supabaseAdmin.from("articles").upsert(
+        others.map((a) => ({
+          id: a.id, title: a.title, source: a.source,
+          published_at: new Date(a.publishedAt).toISOString(),
+          summary: a.summary, url: a.url,
+          fetched_at: fetchedAt,
+        })),
+        { onConflict: "id" }
+      );
+      if (error) console.error("[supabase] upsert failed:", error.message);
+    }
+
+    console.log(`[supabase] upserted ${deduped.length} articles`);
   }
 
-  // Merge existing topics + neighborhoods from previous classification cycles.
-  // Articles just fetched from RSS don't have topics yet (classification is fire-and-forget),
-  // but Supabase may already have them from a prior cycle.
+  // Merge existing topics + neighborhoods from Supabase into the in-memory articles for display.
+  // Alcaldía articles always get "Gobernanza"; others use whatever the daily cron stored.
   if (deduped.length > 0) {
     const { data: existing } = await supabase
       .from("articles")
@@ -92,37 +109,15 @@ export async function fetchAllNews(): Promise<NewsResponse> {
         existing.map((r) => [r.id as string, { topic: r.topic as Topic | undefined, neighborhood: r.neighborhood as string | undefined }])
       );
       for (let i = 0; i < deduped.length; i++) {
+        if (deduped[i].source === "Alcaldía de Cali") {
+          deduped[i].topic = "Gobernanza";
+          continue;
+        }
         const meta = metaMap.get(deduped[i].id);
         if (meta?.topic) deduped[i].topic = meta.topic;
         if (meta?.neighborhood) deduped[i].neighborhood = meta.neighborhood;
       }
     }
-  }
-
-  // Classify + update topics fire-and-forget (doesn't block render or stats)
-  if (deduped.length > 0) {
-    classifyArticles(deduped)
-      .then((classified) =>
-        supabaseAdmin.from("articles").upsert(
-          classified.map((a) => ({
-            id: a.id,
-            title: a.title,
-            source: a.source,
-            published_at: new Date(a.publishedAt).toISOString(),
-            summary: a.summary,
-            url: a.url,
-            topic: a.topic ?? null,
-            neighborhood: a.neighborhood ?? null,
-            fetched_at: fetchedAt,
-          })),
-          { onConflict: "id" }
-        )
-      )
-      .then(({ error }) => {
-        if (error) console.error("[supabase] topic update failed:", error.message);
-        else console.log("[supabase] topics updated");
-      })
-      .catch((err) => console.error("[classify] failed:", err));
   }
 
   return { articles: deduped, fetchedAt, total: deduped.length };
