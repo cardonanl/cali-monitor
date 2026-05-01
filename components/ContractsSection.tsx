@@ -9,18 +9,15 @@ import { es } from "date-fns/locale";
 const ALL = "Todos";
 type View = "grid" | "table";
 
-const ESTADO_COLORS: Record<string, string> = {
-  activo:    "var(--green)",
-  ejecuci:   "var(--green)",
-  cerrado:   "var(--yellow)",
-  terminado: "var(--orange)",
-  liquidado: "var(--text-muted)",
-  suspendido:"var(--red)",
-};
-function estadoColor(estado: string) {
+function estadoBadgeStyle(estado: string): { bg: string; text: string } {
   const key = estado.toLowerCase();
-  for (const [p, c] of Object.entries(ESTADO_COLORS)) if (key.includes(p)) return c;
-  return "var(--white)";
+  if (key.includes("activo") || key.includes("ejecuci"))
+    return { bg: "var(--green-bg)", text: "var(--green-ink)" };
+  if (key.includes("suspendido"))
+    return { bg: "var(--red-bg)", text: "var(--red-ink)" };
+  if (key.includes("terminado") || key.includes("cerrado") || key.includes("liquidado"))
+    return { bg: "var(--amber-bg)", text: "var(--amber-ink)" };
+  return { bg: "var(--paper-soft)", text: "var(--ink-muted)" };
 }
 
 export function ContractsSection({ contracts }: { contracts: Contract[] }) {
@@ -55,35 +52,41 @@ export function ContractsSection({ contracts }: { contracts: Contract[] }) {
     <section className="flex-1 w-full px-6 py-4">
 
       {/* Filter bar */}
-      <div className="mb-4 p-5 terminal-panel">
+      <div className="mb-4 p-5 panel">
         <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
-          <p className="text-lg tracking-wider" style={{ color: "var(--white)" }}>
-            ▶ CONTRATOS{" "}
-            <span style={{ color: "var(--yellow)" }}>
+          <p className="text-sm" style={{ color: "var(--ink-soft)" }}>
+            Contratos{" "}
+            <span style={{ color: "var(--ink-muted)", fontFamily: "var(--font-mono)" }}>
               — {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
             </span>
           </p>
           <div className="flex items-center gap-2">
-            {/* View toggle */}
             <button
               onClick={() => setView(view === "grid" ? "table" : "grid")}
-              className="text-base px-4 py-1.5 font-bold transition-colors"
+              className="text-xs px-3 py-1.5 transition-colors"
               style={{
-                color: "#000",
-                backgroundColor: "var(--green)",
-                border: "none",
-                fontFamily: "inherit",
+                color: "var(--indigo)",
+                backgroundColor: "var(--indigo-bg)",
+                border: "1px solid #3333FF40",
+                borderRadius: 2,
+                fontFamily: "var(--font-mono)",
               }}
             >
-              {view === "grid" ? "[TABLA]" : "[MÓDULOS]"}
+              {view === "grid" ? "Vista tabla" : "Vista módulos"}
             </button>
             {hasFilters && (
               <button
                 onClick={() => { setActiveEstado(ALL); setActiveTipo(ALL); }}
-                className="text-base px-4 py-1.5 font-bold"
-                style={{ color: "#000", backgroundColor: "var(--red)", border: "none", fontFamily: "inherit" }}
+                className="text-xs px-3 py-1.5"
+                style={{
+                  color: "var(--red-ink)",
+                  backgroundColor: "var(--red-bg)",
+                  border: "1px solid #8B1A1A30",
+                  borderRadius: 2,
+                  fontFamily: "var(--font-mono)",
+                }}
               >
-                [LIMPIAR ×]
+                Limpiar ×
               </button>
             )}
           </div>
@@ -91,20 +94,20 @@ export function ContractsSection({ contracts }: { contracts: Contract[] }) {
 
         {/* Estado pills */}
         <div className="flex flex-wrap gap-2 mb-3">
-          <Pill label="TODOS" active={activeEstado === ALL} color="var(--white)" onClick={() => setActiveEstado(ALL)} />
+          <Pill label="Todos" active={activeEstado === ALL} onClick={() => setActiveEstado(ALL)} />
           {estados.map((e) => (
-            <Pill key={e} label={e} active={activeEstado === e} color="var(--yellow)"
+            <Pill key={e} label={e} active={activeEstado === e}
               onClick={() => setActiveEstado(activeEstado === e ? ALL : e)} />
           ))}
         </div>
 
         {/* Tipo pills */}
         {tipos.length > 1 && (
-          <div className="flex flex-wrap gap-2 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
-            <span className="text-base self-center mr-2" style={{ color: "var(--yellow)" }}>TIPO:</span>
-            <Pill label="TODOS" active={activeTipo === ALL} color="var(--white)" onClick={() => setActiveTipo(ALL)} />
+          <div className="flex flex-wrap gap-2 pt-3" style={{ borderTop: "1px solid var(--rule)" }}>
+            <span className="text-xs self-center mr-2 label-mono">Tipo:</span>
+            <Pill label="Todos" active={activeTipo === ALL} onClick={() => setActiveTipo(ALL)} />
             {tipos.map((t) => (
-              <Pill key={t} label={t} active={activeTipo === t} color="var(--green)"
+              <Pill key={t} label={t} active={activeTipo === t}
                 onClick={() => setActiveTipo(activeTipo === t ? ALL : t)} />
             ))}
           </div>
@@ -113,8 +116,8 @@ export function ContractsSection({ contracts }: { contracts: Contract[] }) {
 
       {/* Results */}
       {filtered.length === 0 ? (
-        <div className="text-center py-20 text-lg" style={{ color: "var(--yellow)" }}>
-          &gt; SIN RESULTADOS PARA ESTE FILTRO_
+        <div className="text-center py-20 text-sm" style={{ color: "var(--ink-muted)" }}>
+          Sin resultados para este filtro.
         </div>
       ) : view === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -133,17 +136,20 @@ function TableView({ contracts }: { contracts: Contract[] }) {
       <table style={{
         width: "100%",
         borderCollapse: "collapse",
-        fontFamily: "inherit",
+        fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
         fontSize: "0.82rem",
       }}>
         <thead>
-          <tr style={{ borderBottom: "1px solid var(--yellow)" }}>
-            {["ESTADO", "ENTIDAD", "OBJETO", "TIPO", "VALOR", "FIRMA"].map((h) => (
+          <tr style={{ borderBottom: "1px solid var(--rule)" }}>
+            {["Estado", "Entidad", "Objeto", "Tipo", "Valor", "Firma"].map((h) => (
               <th key={h} style={{
                 textAlign: "left",
                 padding: "6px 10px",
-                color: "var(--yellow)",
-                letterSpacing: "0.1em",
+                color: "var(--ink-muted)",
+                letterSpacing: "0.08em",
+                fontFamily: "var(--font-mono), monospace",
+                fontSize: "0.68rem",
+                textTransform: "uppercase",
                 fontWeight: "normal",
                 whiteSpace: "nowrap",
               }}>{h}</th>
@@ -152,27 +158,34 @@ function TableView({ contracts }: { contracts: Contract[] }) {
         </thead>
         <tbody>
           {contracts.map((c, i) => {
-            const color = estadoColor(c.estado);
+            const badge = estadoBadgeStyle(c.estado);
             const timeAgo = c.fechaFirma
               ? formatDistanceToNow(new Date(c.fechaFirma), { addSuffix: true, locale: es })
               : "—";
             return (
               <tr key={c.id}
-                style={{ borderBottom: "1px solid var(--border)", backgroundColor: i % 2 === 0 ? "transparent" : "#0d0d0d" }}>
+                style={{ borderBottom: "1px solid var(--rule)", backgroundColor: i % 2 === 0 ? "transparent" : "var(--paper-soft)" }}>
                 <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
-                  <span style={{ color: "#000", backgroundColor: color, padding: "1px 6px", fontSize: "0.72rem", fontWeight: "bold" }}>
+                  <span style={{
+                    backgroundColor: badge.bg,
+                    color: badge.text,
+                    padding: "2px 6px",
+                    fontSize: "0.72rem",
+                    fontWeight: 500,
+                    borderRadius: 2,
+                  }}>
                     {c.estado}
                   </span>
                 </td>
-                <td style={{ padding: "8px 10px", color: "var(--yellow)", maxWidth: 180 }}>
+                <td style={{ padding: "8px 10px", color: "var(--ink-soft)", maxWidth: 180 }}>
                   <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {c.entidad}
                   </span>
                 </td>
-                <td style={{ padding: "8px 10px", color: "var(--white)", maxWidth: 260 }}>
+                <td style={{ padding: "8px 10px", color: "var(--ink)", maxWidth: 260 }}>
                   {c.url ? (
                     <a href={c.url} target="_blank" rel="noopener noreferrer"
-                      style={{ color: "var(--white)", textDecoration: "none" }}
+                      style={{ color: "var(--ink)", textDecoration: "none" }}
                       className="hover:underline">
                       <span style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {c.objeto}
@@ -184,13 +197,13 @@ function TableView({ contracts }: { contracts: Contract[] }) {
                     </span>
                   )}
                 </td>
-                <td style={{ padding: "8px 10px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                <td style={{ padding: "8px 10px", color: "var(--ink-muted)", whiteSpace: "nowrap" }}>
                   {c.tipo}
                 </td>
-                <td style={{ padding: "8px 10px", color, whiteSpace: "nowrap", fontWeight: "bold" }}>
-                  {formatCOP(c.valor)}
+                <td style={{ padding: "8px 10px", color: "var(--ink)", whiteSpace: "nowrap", fontWeight: 500, fontFamily: "var(--font-mono)" }}>
+                  {c.valor === 0 ? <em style={{ color: "var(--ink-muted)", fontWeight: 400 }}>—</em> : formatCOP(c.valor)}
                 </td>
-                <td style={{ padding: "8px 10px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                <td style={{ padding: "8px 10px", color: "var(--ink-muted)", whiteSpace: "nowrap", fontFamily: "var(--font-mono)", fontSize: "0.75rem" }}>
                   {timeAgo}
                 </td>
               </tr>
@@ -202,19 +215,17 @@ function TableView({ contracts }: { contracts: Contract[] }) {
   );
 }
 
-function Pill({ label, active, color, onClick }: {
-  label: string; active: boolean; color: string; onClick: () => void;
+function Pill({ label, active, onClick }: {
+  label: string; active: boolean; onClick: () => void;
 }) {
   return (
-    <button onClick={onClick} className="px-3 py-1.5 text-base transition-all"
+    <button onClick={onClick} className="px-3 py-1 text-sm transition-all"
       style={{
-        color: active ? "#000" : color,
-        backgroundColor: active ? color : "transparent",
-        border: `2px solid ${color}`,
-        fontFamily: "inherit",
-        letterSpacing: "0.03em",
-        fontWeight: active ? "bold" : "normal",
-        opacity: active ? 1 : 0.75,
+        fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
+        borderRadius: 2,
+        color: active ? "var(--indigo)" : "var(--ink-muted)",
+        backgroundColor: active ? "var(--indigo-bg)" : "transparent",
+        border: `1px solid ${active ? "#3333FF40" : "var(--rule)"}`,
       }}>
       {label}
     </button>

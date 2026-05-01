@@ -41,28 +41,34 @@ export function ArticleSection({ articles }: { articles: Article[] }) {
     <section className="flex-1 w-full px-6 py-4">
 
       {/* Filter bar */}
-      <div className="mb-4 p-5 terminal-panel">
+      <div className="mb-4 p-5 panel">
         <div className="flex items-center justify-between mb-4">
-          <p className="text-lg tracking-wider" style={{ color: "var(--white)" }}>
-            ▶ FILTROS{" "}
-            <span style={{ color: "var(--yellow)" }}>
+          <p className="text-sm" style={{ color: "var(--ink-soft)" }}>
+            Filtros{" "}
+            <span style={{ color: "var(--ink-muted)", fontFamily: "var(--font-mono)" }}>
               — {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
             </span>
           </p>
           {hasFilters && (
             <button
               onClick={() => { setActiveTopic(ALL); setActiveNeighborhood(ALL); }}
-              className="text-base px-4 py-1.5 font-bold transition-colors"
-              style={{ color: "#000", backgroundColor: "var(--red)", border: "none", fontFamily: "inherit" }}
+              className="text-xs px-3 py-1.5 transition-colors"
+              style={{
+                color: "var(--red-ink)",
+                backgroundColor: "var(--red-bg)",
+                border: "1px solid #8B1A1A30",
+                borderRadius: 2,
+                fontFamily: "var(--font-mono)",
+              }}
             >
-              [LIMPIAR ×]
+              Limpiar ×
             </button>
           )}
         </div>
 
         {/* Topic pills */}
         <div className="flex flex-wrap gap-2 mb-3">
-          <Pill label="TODOS" active={activeTopic === ALL} color="#ffffff"
+          <Pill label="Todos" active={activeTopic === ALL} color="default"
             onClick={() => setActiveTopic(ALL)} />
           {topics.map((t) => (
             <Pill key={t} label={t} active={activeTopic === t} color={TOPIC_COLORS_HEX[t]}
@@ -72,12 +78,12 @@ export function ArticleSection({ articles }: { articles: Article[] }) {
 
         {/* Neighborhood pills */}
         {neighborhoods.length > 0 && (
-          <div className="flex flex-wrap gap-2 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
-            <span className="text-base self-center mr-2" style={{ color: "var(--yellow)" }}>BARRIO:</span>
-            <Pill label="TODOS" active={activeNeighborhood === ALL} color="#aaaaaa"
+          <div className="flex flex-wrap gap-2 pt-3" style={{ borderTop: "1px solid var(--rule)" }}>
+            <span className="text-xs self-center mr-2 label-mono">Barrio:</span>
+            <Pill label="Todos" active={activeNeighborhood === ALL} color="default"
               onClick={() => setActiveNeighborhood(ALL)} />
             {neighborhoods.map((n) => (
-              <Pill key={n} label={n} active={activeNeighborhood === n} color="var(--green)"
+              <Pill key={n} label={n} active={activeNeighborhood === n} color="green"
                 onClick={() => setActiveNeighborhood(activeNeighborhood === n ? ALL : n)} />
             ))}
           </div>
@@ -86,8 +92,8 @@ export function ArticleSection({ articles }: { articles: Article[] }) {
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div className="text-center py-20 text-lg" style={{ color: "var(--yellow)" }}>
-          &gt; SIN RESULTADOS PARA ESTE FILTRO_
+        <div className="text-center py-20 text-sm" style={{ color: "var(--ink-muted)" }}>
+          Sin resultados para este filtro.
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -101,19 +107,22 @@ export function ArticleSection({ articles }: { articles: Article[] }) {
 function Pill({ label, active, color, onClick }: {
   label: string; active: boolean; color: string; onClick: () => void;
 }) {
-  const isVar = color.startsWith("var(");
+  const isDefault = color === "default";
+  const isGreen = color === "green";
+  const activeColor = isDefault || isGreen ? "var(--indigo)" : color;
+  const activeBg = isDefault || isGreen ? "var(--indigo-bg)" : color + "18";
+  const activeBorder = isDefault || isGreen ? "var(--indigo)" : color + "60";
+
   return (
     <button
       onClick={onClick}
-      className="px-3 py-1.5 text-base transition-all"
+      className="px-3 py-1 text-sm transition-all"
       style={{
-        color: active ? "#000000" : (isVar ? color : color),
-        backgroundColor: active ? color : "transparent",
-        border: `2px solid ${color}`,
-        fontFamily: "inherit",
-        letterSpacing: "0.03em",
-        fontWeight: active ? "bold" : "normal",
-        opacity: active ? 1 : 0.75,
+        fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
+        borderRadius: 2,
+        color: active ? activeColor : "var(--ink-muted)",
+        backgroundColor: active ? activeBg : "transparent",
+        border: `1px solid ${active ? activeBorder : "var(--rule)"}`,
       }}
     >
       {label}

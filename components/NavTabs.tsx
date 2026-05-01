@@ -5,8 +5,8 @@ type ActivePage = "noticias" | "contratos";
 export function NavTabs({ active }: { active: ActivePage }) {
   return (
     <div className="flex items-center gap-2">
-      <Tab href="/"          label="NOTICIAS"  active={active === "noticias"}  />
-      <Tab href="/contratos" label="CONTRATOS" active={active === "contratos"} />
+      <Tab href="/"          label="Noticias"  active={active === "noticias"}  />
+      <Tab href="/contratos" label="Contratos" active={active === "contratos"} />
     </div>
   );
 }
@@ -16,14 +16,15 @@ function Tab({ href, label, active }: { href: string; label: string; active: boo
     <Link
       href={href}
       style={{
-        fontFamily: "inherit",
-        fontSize: "0.78rem",
-        letterSpacing: "0.1em",
-        padding: "2px 12px",
+        fontFamily: "var(--font-dm-sans), system-ui, sans-serif",
+        fontSize: "0.82rem",
+        fontWeight: active ? 500 : 400,
+        padding: "4px 14px",
         textDecoration: "none",
-        color:           active ? "#000000"        : "var(--yellow)",
-        backgroundColor: active ? "var(--yellow)"  : "transparent",
-        border:          "1px solid var(--yellow)",
+        borderRadius: 2,
+        color:           active ? "#ffffff"           : "var(--ink-muted)",
+        backgroundColor: active ? "var(--indigo)"     : "transparent",
+        border:          active ? "1px solid var(--indigo)" : "1px solid var(--rule)",
       }}
     >
       {label}

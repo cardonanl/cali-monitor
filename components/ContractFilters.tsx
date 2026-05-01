@@ -26,59 +26,74 @@ export function ContractFilters() {
   const hasFilters = desde || hasta;
 
   return (
-    <div className="terminal-panel p-5 mx-6 mt-5">
-      <div className="panel-title">▶ FILTRAR POR FECHA DE FIRMA</div>
+    <div className="panel p-5 mx-6 mt-5">
+      <div className="panel-title">FILTRAR POR FECHA DE FIRMA</div>
       <div className="flex flex-wrap items-end gap-4">
 
         <label className="flex flex-col gap-1">
-          <span className="text-xs tracking-widest" style={{ color: "var(--yellow)" }}>// DESDE</span>
+          <span className="label-mono">Desde</span>
           <input
             type="date"
             value={desde}
             onChange={(e) => setDesde(e.target.value)}
-            className="text-base px-3 py-1.5"
+            className="text-sm px-3 py-1.5"
             style={{
-              backgroundColor: "#1a1a1a",
-              border: "1px solid var(--border)",
-              color: "var(--white)",
-              fontFamily: "inherit",
-              colorScheme: "dark",
+              backgroundColor: "var(--paper)",
+              border: "1px solid var(--rule)",
+              color: "var(--ink)",
+              fontFamily: "var(--font-mono), monospace",
+              borderRadius: 2,
+              colorScheme: "light",
             }}
           />
         </label>
 
         <label className="flex flex-col gap-1">
-          <span className="text-xs tracking-widest" style={{ color: "var(--yellow)" }}>// HASTA</span>
+          <span className="label-mono">Hasta</span>
           <input
             type="date"
             value={hasta}
             onChange={(e) => setHasta(e.target.value)}
-            className="text-base px-3 py-1.5"
+            className="text-sm px-3 py-1.5"
             style={{
-              backgroundColor: "#1a1a1a",
-              border: "1px solid var(--border)",
-              color: "var(--white)",
-              fontFamily: "inherit",
-              colorScheme: "dark",
+              backgroundColor: "var(--paper)",
+              border: "1px solid var(--rule)",
+              color: "var(--ink)",
+              fontFamily: "var(--font-mono), monospace",
+              borderRadius: 2,
+              colorScheme: "light",
             }}
           />
         </label>
 
         <button
           onClick={apply}
-          className="text-base px-5 py-1.5 font-bold"
-          style={{ backgroundColor: "var(--green)", color: "#000", border: "none", fontFamily: "inherit" }}
+          className="text-sm px-5 py-1.5"
+          style={{
+            backgroundColor: "var(--indigo)",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: 2,
+            fontFamily: "var(--font-mono), monospace",
+            letterSpacing: "0.04em",
+          }}
         >
-          [APLICAR]
+          Aplicar
         </button>
 
         {hasFilters && (
           <button
             onClick={clear}
-            className="text-base px-4 py-1.5 font-bold"
-            style={{ backgroundColor: "var(--red)", color: "#000", border: "none", fontFamily: "inherit" }}
+            className="text-sm px-4 py-1.5"
+            style={{
+              backgroundColor: "var(--red-bg)",
+              color: "var(--red-ink)",
+              border: "1px solid #8B1A1A30",
+              borderRadius: 2,
+              fontFamily: "var(--font-mono), monospace",
+            }}
           >
-            [LIMPIAR ×]
+            Limpiar ×
           </button>
         )}
       </div>

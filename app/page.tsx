@@ -20,14 +20,14 @@ export default async function Home() {
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--bg-base)" }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--paper)" }}>
       <Header total={total} fetchedAt={fetchedAt} />
       <Dashboard stats={stats} weekly={weekly} words={words} neighborhoodArticles={neighborhoodArticles} dailySummary={dailySummary} />
 
       <ArticleSection articles={articles} />
 
       <footer className="text-center text-xs py-4"
-        style={{ color: "var(--text-muted)", borderTop: "1px solid var(--border)" }}>
+        style={{ color: "var(--ink-muted)", borderTop: "1px solid var(--rule)", fontFamily: "var(--font-mono)" }}>
         Cali Monitor · {new Date().getFullYear()}
       </footer>
     </div>

@@ -34,12 +34,10 @@ export function BarriosMap({ articles }: Props) {
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
-    // Dynamic import to avoid SSR issues with Leaflet
     Promise.all([
       import("leaflet"),
       fetch("/barrios.geojson").then((r) => r.json() as Promise<GeoJSON>),
     ]).then(([L, geojson]) => {
-      // Fix Leaflet's default icon paths broken by webpack
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl;
       L.Icon.Default.mergeOptions({
@@ -48,7 +46,6 @@ export function BarriosMap({ articles }: Props) {
         shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
       });
 
-      // Build lookup: barrio name → articles
       const byNeighborhood = new Map<string, NeighborhoodArticle[]>();
       for (const a of articles) {
         const key = a.neighborhood.toLowerCase().trim();
@@ -64,9 +61,8 @@ export function BarriosMap({ articles }: Props) {
 
       mapInstanceRef.current = map;
 
-      // Base tile layer — dark style matching the dashboard
       L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
         {
           attribution:
             '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
@@ -74,16 +70,15 @@ export function BarriosMap({ articles }: Props) {
         }
       ).addTo(map);
 
-      // Draw barrio polygons
       L.geoJSON(geojson as Parameters<typeof L.geoJSON>[0], {
         style: (feature) => {
           const name = feature?.properties?.barrio?.toLowerCase()?.trim() ?? "";
           const hasNews = byNeighborhood.has(name);
           return {
-            color: hasNews ? "#5588ff" : "#1a3a6a",
-            weight: hasNews ? 1.5 : 0.6,
-            fillColor: hasNews ? "#1a4fd6" : "#051828",
-            fillOpacity: hasNews ? 0.30 : 0.05,
+            color:       hasNews ? "#3333FF" : "#B8B2A8",
+            weight:      hasNews ? 1.5 : 0.6,
+            fillColor:   hasNews ? "#3333FF" : "#D4CFC6",
+            fillOpacity: hasNews ? 0.18 : 0.05,
           };
         },
         onEachFeature: (feature, layer) => {
@@ -92,23 +87,23 @@ export function BarriosMap({ articles }: Props) {
           const arts = byNeighborhood.get(key) ?? [];
 
           let popupHtml = `<div style="max-width:260px;font-family:system-ui;font-size:13px">
-            <strong style="color:#ffffff">${name}</strong>
-            <span style="color:#ffd700;font-size:11px;margin-left:6px">Comuna ${feature.properties?.comuna ?? ""}</span>`;
+            <strong style="color:#1A1814">${name}</strong>
+            <span style="color:#8C857C;font-size:11px;margin-left:6px">Comuna ${feature.properties?.comuna ?? ""}</span>`;
 
           if (arts.length > 0) {
-            popupHtml += `<hr style="border-color:#1e2f4d;margin:6px 0">`;
+            popupHtml += `<hr style="border-color:#D4CFC6;margin:6px 0">`;
             for (const a of arts.slice(0, 5)) {
-              const color = TOPIC_COLORS_HEX[(a.topic ?? "General") as Topic] ?? "#64748b";
+              const color = TOPIC_COLORS_HEX[(a.topic ?? "General") as Topic] ?? "#6f6f6f";
               popupHtml += `<div style="margin-bottom:6px">
                 <span style="color:${color};font-size:10px;text-transform:uppercase">${a.topic ?? "General"}</span><br>
                 <a href="${a.url}" target="_blank" rel="noopener"
-                   style="color:#5588ff;text-decoration:none;line-height:1.3">
+                   style="color:#3333FF;text-decoration:none;line-height:1.3">
                   ${a.title}
                 </a>
               </div>`;
             }
             if (arts.length > 5) {
-              popupHtml += `<p style="color:#ffd700;font-size:11px">+${arts.length - 5} más</p>`;
+              popupHtml += `<p style="color:#8C857C;font-size:11px">+${arts.length - 5} más</p>`;
             }
           }
 
@@ -121,7 +116,6 @@ export function BarriosMap({ articles }: Props) {
         },
       }).addTo(map);
 
-      // Article count markers for barrios with news
       for (const feature of geojson.features) {
         const name = feature.properties.barrio?.toLowerCase()?.trim() ?? "";
         const arts = byNeighborhood.get(name);
@@ -130,17 +124,17 @@ export function BarriosMap({ articles }: Props) {
         const { centroid_lat, centroid_lng, barrio, comuna } = feature.properties;
         if (!centroid_lat || !centroid_lng) continue;
 
-        const color = TOPIC_COLORS_HEX[(arts[0].topic ?? "General") as Topic] ?? "#38bdf8";
+        const color = TOPIC_COLORS_HEX[(arts[0].topic ?? "General") as Topic] ?? "#3333FF";
 
         const icon = L.divIcon({
           html: `<div style="
             background:${color};
-            color:#070d1a;
+            color:#ffffff;
             border-radius:50%;
             width:22px;height:22px;
             display:flex;align-items:center;justify-content:center;
             font-size:11px;font-weight:700;
-            box-shadow:0 0 6px ${color}88;
+            box-shadow:0 1px 4px rgba(0,0,0,0.2);
             cursor:pointer;
           ">${arts.length}</div>`,
           className: "",
@@ -149,22 +143,22 @@ export function BarriosMap({ articles }: Props) {
         });
 
         let popupHtml = `<div style="max-width:260px;font-family:system-ui;font-size:13px">
-          <strong style="color:#ffffff">${barrio}</strong>
-          <span style="color:#ffd700;font-size:11px;margin-left:6px">Comuna ${comuna}</span>
-          <hr style="border-color:#1e2f4d;margin:6px 0">`;
+          <strong style="color:#1A1814">${barrio}</strong>
+          <span style="color:#8C857C;font-size:11px;margin-left:6px">Comuna ${comuna}</span>
+          <hr style="border-color:#D4CFC6;margin:6px 0">`;
 
         for (const a of arts.slice(0, 5)) {
-          const c = TOPIC_COLORS_HEX[(a.topic ?? "General") as Topic] ?? "#64748b";
+          const c = TOPIC_COLORS_HEX[(a.topic ?? "General") as Topic] ?? "#6f6f6f";
           popupHtml += `<div style="margin-bottom:6px">
             <span style="color:${c};font-size:10px;text-transform:uppercase">${a.topic ?? "General"}</span><br>
             <a href="${a.url}" target="_blank" rel="noopener"
-               style="color:#5588ff;text-decoration:none;line-height:1.3">
+               style="color:#3333FF;text-decoration:none;line-height:1.3">
               ${a.title}
             </a>
           </div>`;
         }
         if (arts.length > 5) {
-          popupHtml += `<p style="color:#ffd700;font-size:11px">+${arts.length - 5} noticias más</p>`;
+          popupHtml += `<p style="color:#8C857C;font-size:11px">+${arts.length - 5} noticias más</p>`;
         }
         popupHtml += `</div>`;
 
@@ -185,16 +179,16 @@ export function BarriosMap({ articles }: Props) {
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossOrigin="" />
       <style>{`
         .cali-popup .leaflet-popup-content-wrapper {
-          background: #111111;
-          border: 1px solid #2e2e2e;
+          background: #F0EDE6;
+          border: 1px solid #D4CFC6;
           border-radius: 4px;
-          color: #ffffff;
-          font-family: "Share Tech Mono", monospace;
+          color: #1A1814;
+          font-family: system-ui, sans-serif;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.12);
         }
-        .cali-popup .leaflet-popup-tip { background: #111111; }
-        .cali-popup .leaflet-popup-close-button { color: #ffd700; }
+        .cali-popup .leaflet-popup-tip { background: #F0EDE6; }
+        .cali-popup .leaflet-popup-close-button { color: #3333FF; }
       `}</style>
-      {/* position:relative wrapper so the map div can use absolute fill */}
       <div style={{ position: "relative", width: "100%", height: "100%" }}>
         <div ref={mapRef} style={{ position: "absolute", inset: 0 }} />
       </div>

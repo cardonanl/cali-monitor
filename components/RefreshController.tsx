@@ -34,27 +34,26 @@ export function RefreshController({ fetchedAt }: { fetchedAt: string }) {
   const timeStr = new Date(fetchedAt).toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="flex items-center gap-3 text-xs" style={{ color: "var(--yellow)" }}>
+    <div className="flex items-center gap-3 text-xs"
+      style={{ color: "var(--ink-muted)", fontFamily: "var(--font-mono)" }}>
       <span className="hidden sm:inline">ULT. ACT. {timeStr}</span>
-      <span style={{ color: isPending ? "var(--green)" : "var(--yellow)" }}>
+      <span style={{ color: isPending ? "var(--indigo)" : "var(--ink-muted)" }}>
         {isPending ? "ACTUALIZANDO..." : `T-${formatCountdown(remaining)}`}
       </span>
       <button
         onClick={doRefresh}
         disabled={isPending}
-        className="text-sm px-3 py-1.5 disabled:opacity-40 transition-all"
+        className="text-xs px-3 py-1.5 disabled:opacity-40 transition-all"
         style={{
-          color: "#000",
-          backgroundColor: "var(--yellow)",
+          color: "#ffffff",
+          backgroundColor: "var(--indigo)",
           border: "none",
-          fontFamily: "inherit",
+          borderRadius: 2,
+          fontFamily: "var(--font-mono)",
           letterSpacing: "0.05em",
-          fontWeight: "bold",
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--white)")}
-        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--yellow)")}
       >
-        {isPending ? "..." : "[ACTUALIZAR]"}
+        {isPending ? "..." : "Actualizar"}
       </button>
     </div>
   );

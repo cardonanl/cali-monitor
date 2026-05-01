@@ -7,8 +7,8 @@ const PALETTE = Object.values(TOPIC_COLORS_HEX) as string[];
 
 export function WordCloud({ data }: { data: WordFreq[] }) {
   if (!data.length) return (
-    <p className="text-sm py-8 text-center" style={{ color: "var(--text-muted)" }}>
-      &gt; Sin datos — las palabras aparecerán tras el primer ciclo de fetch_
+    <p className="text-sm py-8 text-center" style={{ color: "var(--ink-muted)" }}>
+      Sin datos — las palabras aparecerán tras el primer ciclo de fetch.
     </p>
   );
 
