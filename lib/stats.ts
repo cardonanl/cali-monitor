@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { supabase } from "./supabase";
-import { DashboardStats, Topic } from "./types";
+import { DashboardStats } from "./types";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
