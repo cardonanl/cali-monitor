@@ -31,23 +31,46 @@ export interface ContractStats {
 }
 
 export interface FetchContractsOptions {
-  desde?: string;   // "YYYY-MM-DD"
-  hasta?: string;   // "YYYY-MM-DD"
+  desde?: string;       // "YYYY-MM-DD"
+  hasta?: string;       // "YYYY-MM-DD"
   limite?: number;
+  entidad?: string;     // nombre_entidad LIKE
+  modalidad?: string;   // modalidad_de_contratacion exact
+  valorMin?: string;    // valor_del_contrato >=
+  valorMax?: string;    // valor_del_contrato <=
+  esPyme?: boolean;     // es_pyme = 'Sí'
+  busqueda?: string;    // $q full-text (objeto_del_contrato y otros)
+  contratista?: string; // proveedor_adjudicado LIKE, o documento_proveedor exact si es numérico
 }
 
-function buildUrl({ desde, hasta, limite = 20 }: FetchContractsOptions): string {
-  const params = new URLSearchParams();
+function esc(s: string): string {
+  return s.replace(/'/g, "''");
+}
 
-  if (desde || hasta) {
-    const conds = ["ciudad='Cali'"];
-    if (desde) conds.push(`fecha_de_firma >= '${desde}T00:00:00.000'`);
-    if (hasta) conds.push(`fecha_de_firma <= '${hasta}T23:59:59.000'`);
-    params.set("$where", conds.join(" AND "));
-  } else {
-    params.set("ciudad", "Cali");
+function buildUrl({
+  desde, hasta, limite = 20,
+  entidad, modalidad, valorMin, valorMax, esPyme, busqueda, contratista,
+}: FetchContractsOptions): string {
+  const params = new URLSearchParams();
+  const conds: string[] = ["ciudad='Cali'"];
+
+  if (desde) conds.push(`fecha_de_firma >= '${desde}T00:00:00.000'`);
+  if (hasta) conds.push(`fecha_de_firma <= '${hasta}T23:59:59.000'`);
+  if (entidad) conds.push(`upper(nombre_entidad) LIKE upper('%${esc(entidad)}%')`);
+  if (modalidad) conds.push(`modalidad_de_contratacion='${esc(modalidad)}'`);
+  if (valorMin) conds.push(`valor_del_contrato >= ${Number(valorMin)}`);
+  if (valorMax) conds.push(`valor_del_contrato <= ${Number(valorMax)}`);
+  if (esPyme) conds.push(`es_pyme='Sí'`);
+  if (contratista) {
+    if (/^\d+$/.test(contratista.trim())) {
+      conds.push(`documento_proveedor='${esc(contratista.trim())}'`);
+    } else {
+      conds.push(`upper(proveedor_adjudicado) LIKE upper('%${esc(contratista)}%')`);
+    }
   }
 
+  params.set("$where", conds.join(" AND "));
+  if (busqueda) params.set("$q", busqueda);
   params.set("$limit", String(limite));
   params.set("$order", "fecha_de_firma DESC");
 

@@ -9,14 +9,35 @@ import { ContractsSection } from "@/components/ContractsSection";
 export default async function ContratosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ desde?: string; hasta?: string }>;
+  searchParams: Promise<{
+    desde?: string;
+    hasta?: string;
+    entidad?: string;
+    modalidad?: string;
+    valorMin?: string;
+    valorMax?: string;
+    esPyme?: string;
+    busqueda?: string;
+    contratista?: string;
+  }>;
 }) {
-  const { desde, hasta } = await searchParams;
+  const sp = await searchParams;
+  const hasFilter = !!(
+    sp.desde || sp.hasta || sp.entidad || sp.modalidad ||
+    sp.valorMin || sp.valorMax || sp.esPyme || sp.busqueda || sp.contratista
+  );
 
   const contracts = await fetchContracts({
-    desde,
-    hasta,
-    limite: desde || hasta ? 200 : 6,
+    desde:       sp.desde,
+    hasta:       sp.hasta,
+    entidad:     sp.entidad,
+    modalidad:   sp.modalidad,
+    valorMin:    sp.valorMin,
+    valorMax:    sp.valorMax,
+    esPyme:      sp.esPyme === "true",
+    busqueda:    sp.busqueda,
+    contratista: sp.contratista,
+    limite:      hasFilter ? 200 : 6,
   });
 
   const stats = getContractStats(contracts);
