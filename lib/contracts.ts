@@ -28,6 +28,7 @@ export interface ContractStats {
   pymes: number;
   porTipo: { tipo: string; count: number }[];
   porEstado: { estado: string; count: number }[];
+  porEntidad: { entidad: string; count: number }[];
 }
 
 export interface FetchContractsOptions {
@@ -124,9 +125,11 @@ export function getContractStats(contracts: Contract[]): ContractStats {
 
   const tipoMap = new Map<string, number>();
   const estadoMap = new Map<string, number>();
+  const entidadMap = new Map<string, number>();
   for (const c of contracts) {
-    tipoMap.set(c.tipo,     (tipoMap.get(c.tipo)     ?? 0) + 1);
-    estadoMap.set(c.estado, (estadoMap.get(c.estado) ?? 0) + 1);
+    tipoMap.set(c.tipo,       (tipoMap.get(c.tipo)       ?? 0) + 1);
+    estadoMap.set(c.estado,   (estadoMap.get(c.estado)   ?? 0) + 1);
+    entidadMap.set(c.entidad, (entidadMap.get(c.entidad) ?? 0) + 1);
   }
 
   return {
@@ -134,8 +137,9 @@ export function getContractStats(contracts: Contract[]): ContractStats {
     valorTotal,
     activos,
     pymes,
-    porTipo:   [...tipoMap.entries()].sort((a, b) => b[1] - a[1]).map(([tipo, count])   => ({ tipo, count })),
-    porEstado: [...estadoMap.entries()].sort((a, b) => b[1] - a[1]).map(([estado, count]) => ({ estado, count })),
+    porTipo:    [...tipoMap.entries()].sort((a, b) => b[1] - a[1]).map(([tipo, count])     => ({ tipo, count })),
+    porEstado:  [...estadoMap.entries()].sort((a, b) => b[1] - a[1]).map(([estado, count]) => ({ estado, count })),
+    porEntidad: [...entidadMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([entidad, count]) => ({ entidad, count })),
   };
 }
 

@@ -9,9 +9,39 @@ function KpiBlock({ label, value, color }: { label: string; value: string | numb
   );
 }
 
-export function ContractsDashboard({ stats }: { stats: ContractStats }) {
-  const maxTipo = stats.porTipo[0]?.count ?? 1;
+function DistribPanel({ title, rows, color }: {
+  title: string;
+  rows: { label: string; count: number }[];
+  color: string;
+}) {
+  const max = rows[0]?.count ?? 1;
+  return (
+    <div className="panel p-5">
+      <div className="panel-title">{title}</div>
+      <div className="flex flex-col gap-3">
+        {rows.map(({ label, count }) => {
+          const pct = Math.round((count / max) * 100);
+          return (
+            <div key={label}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
+                <span style={{
+                  fontSize: "0.8rem", color: "var(--ink-soft)",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1,
+                }}>{label}</span>
+                <span style={{ fontSize: "0.8rem", color: "var(--ink-muted)", flexShrink: 0, fontFamily: "var(--font-mono)" }}>{count}</span>
+              </div>
+              <div style={{ height: 3, backgroundColor: "var(--rule)" }}>
+                <div style={{ height: "100%", width: `${pct}%`, backgroundColor: color, opacity: 0.6 }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
+export function ContractsDashboard({ stats }: { stats: ContractStats }) {
   return (
     <section className="w-full px-6 pt-5 pb-2 flex flex-col gap-4">
 
@@ -23,30 +53,20 @@ export function ContractsDashboard({ stats }: { stats: ContractStats }) {
         <KpiBlock label="PyME"        value={stats.pymes}                color="var(--ink-soft)"  />
       </div>
 
-      {/* Distribución por tipo */}
       {stats.porTipo.length > 0 && (
-        <div className="panel p-5">
-          <div className="panel-title">DISTRIBUCIÓN POR TIPO DE CONTRATO</div>
-          <div className="flex flex-col gap-3">
-            {stats.porTipo.map(({ tipo, count }) => {
-              const pct = Math.round((count / maxTipo) * 100);
-              return (
-                <div key={tipo}>
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginBottom: 4 }}>
-                    <span style={{
-                      fontSize: "0.8rem", color: "var(--ink-soft)",
-                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1,
-                    }}>{tipo}</span>
-                    <span style={{ fontSize: "0.8rem", color: "var(--ink-muted)", flexShrink: 0, fontFamily: "var(--font-mono)" }}>{count}</span>
-                  </div>
-                  <div style={{ height: 3, backgroundColor: "var(--rule)" }}>
-                    <div style={{ height: "100%", width: `${pct}%`, backgroundColor: "var(--indigo)", opacity: 0.6 }} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <DistribPanel
+          title="DISTRIBUCIÓN POR TIPO DE CONTRATO"
+          rows={stats.porTipo.map(({ tipo, count }) => ({ label: tipo, count }))}
+          color="var(--indigo)"
+        />
+      )}
+
+      {stats.porEntidad.length > 0 && (
+        <DistribPanel
+          title="DISTRIBUCIÓN POR DEPENDENCIA"
+          rows={stats.porEntidad.map(({ entidad, count }) => ({ label: entidad, count }))}
+          color="var(--green-ink)"
+        />
       )}
 
     </section>

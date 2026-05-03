@@ -26,6 +26,10 @@ interface Props {
   articles: NeighborhoodArticle[];
 }
 
+function fmtDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("es-CO", { day: "numeric", month: "short" });
+}
+
 export function BarriosMap({ articles }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -95,7 +99,8 @@ export function BarriosMap({ articles }: Props) {
             for (const a of arts.slice(0, 5)) {
               const color = TOPIC_COLORS_HEX[(a.topic ?? "General") as Topic] ?? "#6f6f6f";
               popupHtml += `<div style="margin-bottom:6px">
-                <span style="color:${color};font-size:10px;text-transform:uppercase">${a.topic ?? "General"}</span><br>
+                <span style="color:${color};font-size:10px;text-transform:uppercase">${a.topic ?? "General"}</span>
+                <span style="color:#8C857C;font-size:10px;margin-left:5px">${fmtDate(a.published_at)}</span><br>
                 <a href="${a.url}" target="_blank" rel="noopener"
                    style="color:#3333FF;text-decoration:none;line-height:1.3">
                   ${a.title}
@@ -150,7 +155,8 @@ export function BarriosMap({ articles }: Props) {
         for (const a of arts.slice(0, 5)) {
           const c = TOPIC_COLORS_HEX[(a.topic ?? "General") as Topic] ?? "#6f6f6f";
           popupHtml += `<div style="margin-bottom:6px">
-            <span style="color:${c};font-size:10px;text-transform:uppercase">${a.topic ?? "General"}</span><br>
+            <span style="color:${c};font-size:10px;text-transform:uppercase">${a.topic ?? "General"}</span>
+            <span style="color:#8C857C;font-size:10px;margin-left:5px">${fmtDate(a.published_at)}</span><br>
             <a href="${a.url}" target="_blank" rel="noopener"
                style="color:#3333FF;text-decoration:none;line-height:1.3">
               ${a.title}
@@ -179,14 +185,14 @@ export function BarriosMap({ articles }: Props) {
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossOrigin="" />
       <style>{`
         .cali-popup .leaflet-popup-content-wrapper {
-          background: #F0EDE6;
+          background: #FFFFFF;
           border: 1px solid #D4CFC6;
           border-radius: 4px;
           color: #1A1814;
           font-family: system-ui, sans-serif;
           box-shadow: 0 2px 8px rgba(0,0,0,0.12);
         }
-        .cali-popup .leaflet-popup-tip { background: #F0EDE6; }
+        .cali-popup .leaflet-popup-tip { background: #FFFFFF; }
         .cali-popup .leaflet-popup-close-button { color: #3333FF; }
       `}</style>
       <div style={{ position: "relative", width: "100%", height: "100%" }}>
