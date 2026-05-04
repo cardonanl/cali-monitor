@@ -36,12 +36,18 @@ export function BarriosMap({ articles }: Props) {
   const mapInstanceRef = useRef<any>(null);
 
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    if (!mapRef.current) return;
+
+    let cancelled = false;
 
     Promise.all([
       import("leaflet"),
       fetch("/barrios.geojson").then((r) => r.json() as Promise<GeoJSON>),
     ]).then(([L, geojson]) => {
+      if (cancelled || !mapRef.current) return;
+      if (mapInstanceRef.current) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((mapRef.current as any)._leaflet_id) return;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl;
       L.Icon.Default.mergeOptions({
@@ -175,6 +181,7 @@ export function BarriosMap({ articles }: Props) {
     });
 
     return () => {
+      cancelled = true;
       mapInstanceRef.current?.remove();
       mapInstanceRef.current = null;
     };

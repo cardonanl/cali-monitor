@@ -1,22 +1,31 @@
 import { after } from "next/server";
 import { fetchAllNews } from "@/lib/fetchNews";
-import { getDashboardStats, getWeeklyActivity, getWordFrequencies, getNeighborhoodArticles, getDailySummary } from "@/lib/stats";
+import { getDashboardStats, getWeeklyActivity, getWordFrequencies, getArticlesInRange, getNeighborhoodArticlesInRange, getDailySummary } from "@/lib/stats";
 import { classifyArticles } from "@/lib/classify";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import { ArticleSection } from "@/components/ArticleSection";
 import { Header } from "@/components/Header";
 import { Dashboard } from "@/components/Dashboard";
+import { DateFilter } from "@/components/DateFilter";
 
-export const revalidate = 1800;
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ desde?: string; hasta?: string }>;
+}) {
+  const sp = await searchParams;
 
-export default async function Home() {
-  // fetchAllNews first — it upserts articles to Supabase synchronously.
-  // Stats queries run after so they always see the current batch.
-  const { articles, fetchedAt, total } = await fetchAllNews();
+  const today = new Date().toISOString().slice(0, 10);
+  const defaultDesde = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const hasta = sp.hasta ?? today;
+  const desde = sp.desde ?? defaultDesde;
+  const isDefault = !sp.desde && !sp.hasta;
 
-  // Fire-and-forget: classify articles that arrived since the last daily cron run.
-  // Runs after the response is sent so it doesn't add latency to the render.
-  const toClassify = articles.filter((a) => a.source !== "Alcaldía de Cali" && !a.topic);
+  // Fetch + upsert fresh articles to keep DB current.
+  const { articles: freshArticles, fetchedAt, total } = await fetchAllNews();
+
+  // Fire-and-forget classification after response is sent.
+  const toClassify = freshArticles.filter((a) => a.source !== "Alcaldía de Cali" && !a.topic);
   if (toClassify.length > 0) {
     after(async () => {
       for (let i = 0; i < toClassify.length; i += 50) {
@@ -40,20 +49,28 @@ export default async function Home() {
     });
   }
 
-  const [stats, weekly, words, neighborhoodArticles, dailySummary] = await Promise.all([
+  const [filteredArticles, neighborhoodArticles, stats, weekly, words, dailySummary] = await Promise.all([
+    getArticlesInRange(desde, hasta),
+    getNeighborhoodArticlesInRange(desde, hasta),
     getDashboardStats(),
     getWeeklyActivity(),
     getWordFrequencies(),
-    getNeighborhoodArticles(),
     getDailySummary(),
   ]);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "var(--paper)" }}>
       <Header total={total} fetchedAt={fetchedAt} />
-      <Dashboard stats={stats} weekly={weekly} words={words} neighborhoodArticles={neighborhoodArticles} dailySummary={dailySummary} />
+      <Dashboard
+        stats={stats}
+        weekly={weekly}
+        words={words}
+        neighborhoodArticles={neighborhoodArticles}
+        dailySummary={dailySummary}
+      />
 
-      <ArticleSection articles={articles} />
+      <DateFilter key={`${desde}-${hasta}`} desde={desde} hasta={hasta} isDefault={isDefault} />
+      <ArticleSection articles={filteredArticles} />
 
       <footer className="text-center text-xs py-4"
         style={{ color: "var(--ink-muted)", borderTop: "1px solid var(--rule)", fontFamily: "var(--font-mono)" }}>

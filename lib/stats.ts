@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { supabase } from "./supabase";
-import { DashboardStats } from "./types";
+import { Article, DashboardStats, Topic } from "./types";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -24,6 +24,39 @@ const STOPWORDS = new Set([
   "puede","colombia","cali","nuevo","nueva","gran","parte","tienen","hacer",
   "así","durante","donde","quien","cada","hoy","ayer","san","santa",
 ]);
+
+export async function getNeighborhoodArticlesInRange(desde: string, hasta: string): Promise<NeighborhoodArticle[]> {
+  const { data } = await supabase
+    .from("articles")
+    .select("id, title, url, topic, neighborhood, published_at")
+    .not("neighborhood", "is", null)
+    .gte("published_at", `${desde}T00:00:00.000Z`)
+    .lte("published_at", `${hasta}T23:59:59.999Z`)
+    .order("published_at", { ascending: false })
+    .limit(500);
+  return (data ?? []) as NeighborhoodArticle[];
+}
+
+export async function getArticlesInRange(desde: string, hasta: string): Promise<Article[]> {
+  const { data } = await supabase
+    .from("articles")
+    .select("id, title, source, published_at, summary, url, topic, neighborhood")
+    .gte("published_at", `${desde}T00:00:00.000Z`)
+    .lte("published_at", `${hasta}T23:59:59.999Z`)
+    .order("published_at", { ascending: false })
+    .limit(500);
+
+  return (data ?? []).map((r) => ({
+    id:           r.id as string,
+    title:        r.title as string,
+    source:       r.source as string,
+    publishedAt:  new Date(r.published_at as string),
+    summary:      (r.summary as string) ?? "",
+    url:          r.url as string,
+    topic:        (r.topic as Topic) ?? undefined,
+    neighborhood: (r.neighborhood as string) ?? undefined,
+  }));
+}
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
